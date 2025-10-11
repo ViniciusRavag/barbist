@@ -884,7 +884,9 @@
             const filteredClients = clients.filter(client => 
                 client.name.toLowerCase().includes(searchTerm)
             );
-
+            
+            filteredClients.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
+            
             clientsGrid.innerHTML = '';
             
             if (filteredClients.length === 0) {
@@ -1192,4 +1194,5 @@
     </script>
 </body>
 </html>
+
 
