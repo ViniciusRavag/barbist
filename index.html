@@ -35,7 +35,6 @@
     .heading-font {
       font-family: 'Playfair Display', serif;
     }
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -49,7 +48,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: var(--gold-primary);
     }
-    /* Glassmorphism Classes */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(12px);
@@ -68,7 +66,6 @@
     }
     .text-gold { color: var(--gold-primary); }
     .border-gold { border-color: var(--gold-primary); }
-    /* Animations */
     .fade-in {
       animation: fadeIn 0.4s ease-out forwards;
     }
@@ -81,168 +78,48 @@
 <body>
   <div id="root"></div>
 
-  <!-- Firebase Modules -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    window.firebaseModules = {
-      initializeApp, getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken,
-      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs
-    };
-  </script>
-
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect } = React;
 
-    // --- Firebase Init Hook ---
-    const useFirebase = () => {
-      const [db, setDb] = useState(null);
-      const [auth, setAuth] = useState(null);
-      const [user, setUser] = useState(null);
-      const [appId, setAppId] = useState('barber-pro-v1');
+    // --- Mock Data ---
+    const mockServices = [
+      { id: '1', name: 'Corte de Cabelo', price: 45, icon: 'fa-scissors' },
+      { id: '2', name: 'Barba', price: 30, icon: 'fa-face-smile' },
+      { id: '3', name: 'Cabelo e Barba', price: 70, icon: 'fa-user-tie' },
+      { id: '4', name: 'Pigmentação', price: 60, icon: 'fa-spray-can' }
+    ];
 
-      useEffect(() => {
-        const { initializeApp, getAuth, getFirestore, signInAnonymously, onAuthStateChanged, signInWithCustomToken } = window.firebaseModules;
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0];
 
-        const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "mock" };
-        const app = initializeApp(config);
-        const authInstance = getAuth(app);
-        const dbInstance = getFirestore(app);
-        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-v1';
+    const mockAppointments = [
+      { id: 'a1', name: 'João Silva', phone: '(11) 99999-1111', service: 'Corte de Cabelo', date: today, time: '10:00', status: 'realizado' },
+      { id: 'a2', name: 'Carlos Mendes', phone: '(11) 99999-2222', service: 'Barba', date: today, time: '14:00', status: 'pendente' },
+      { id: 'a3', name: 'Pedro Alves', phone: '(11) 99999-3333', service: 'Cabelo e Barba', date: tomorrow, time: '16:00', status: 'confirmado' },
+    ];
 
-        setDb(dbInstance);
-        setAuth(authInstance);
-        setAppId(currentAppId);
-
-        const initAuth = async () => {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(authInstance, __initial_auth_token);
-          } else {
-            await signInAnonymously(authInstance);
-          }
-        };
-
-        initAuth();
-        return onAuthStateChanged(authInstance, setUser);
-      }, []);
-
-      return { db, auth, user, appId };
-    };
-
-    // --- Loading Spinner ---
-    const Loading = () => (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
-      </div>
-    );
-
-    // --- Navigation ---
-    const Navigation = ({ activeTab, setActiveTab, onLogout }) => {
-      const menuItems = [
-        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
-        { id: 'schedule', icon: 'fa-calendar-days', label: 'Agenda' },
-        { id: 'clients', icon: 'fa-users', label: 'Clientes' },
-        { id: 'services', icon: 'fa-scissors', label: 'Serviços' },
-      ];
-
-      return (
-        <>
-          {/* Desktop Sidebar */}
-          <div className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 glass-panel border-r border-[#333] z-20">
-            <div className="p-8 text-center border-b border-[#333]">
-              <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">
-                BARBER<span className="text-white">PRO</span>
-              </h1>
-              <p className="text-xs text-gray-400 mt-2">Sistema Integrado</p>
-            </div>
-            <nav className="flex-1 py-6 px-4 space-y-2">
-              {menuItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
-                    activeTab === item.id
-                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg'
-                      : 'text-gray-400 hover:bg-[#333] hover:text-white'
-                  }`}
-                >
-                  <i className={`fa-solid ${item.icon} w-6`}></i>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-            <div className="p-4 border-t border-[#333]">
-              <button
-                onClick={onLogout}
-                className="w-full flex items-center p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition"
-              >
-                <i className="fa-solid fa-right-from-bracket w-6"></i>
-                <span>Sair</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Bottom Nav */}
-          <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#1E1E1E] border-t border-[#333] flex justify-around p-3 z-50">
-            {menuItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center text-xs ${activeTab === item.id ? 'text-gold' : 'text-gray-500'}`}
-              >
-                <i className={`fa-solid ${item.icon} text-lg mb-1`}></i>
-                {item.label}
-              </button>
-            ))}
-            <button onClick={onLogout} className="flex flex-col items-center text-xs text-red-400">
-              <i className="fa-solid fa-right-from-bracket text-lg mb-1"></i> Sair
-            </button>
-          </div>
-        </>
-      );
-    };
-
-    // --- Services Management ---
-    const ServicesConfig = ({ db, appId }) => {
-      const [services, setServices] = useState([]);
-      const [loading, setLoading] = useState(true);
+    // --- Services Config ---
+    const ServicesConfig = () => {
+      const [services, setServices] = useState(mockServices);
       const [isAdding, setIsAdding] = useState(false);
       const [form, setForm] = useState({ name: '', price: '', icon: 'fa-scissors' });
 
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(
-          collection(db, 'artifacts', appId, 'public', 'data', 'services'),
-          (snapshot) => {
-            const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setServices(list);
-            setLoading(false);
-          }
-        );
-        return () => unsubscribe();
-      }, [db, appId]);
-
-      const handleAdd = async () => {
-        const { collection, addDoc } = window.firebaseModules;
+      const handleAdd = () => {
         if (!form.name || !form.price) return;
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'services'), {
+        const newService = {
+          id: `s${Date.now()}`,
           name: form.name.trim(),
           price: parseFloat(form.price),
-          icon: form.icon,
-          createdAt: new Date().toISOString(),
-        });
+          icon: form.icon
+        };
+        setServices([...services, newService]);
         setForm({ name: '', price: '', icon: 'fa-scissors' });
         setIsAdding(false);
       };
 
-      const handleDelete = async (id) => {
-        const { doc, deleteDoc } = window.firebaseModules;
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'services', id));
+      const handleDelete = (id) => {
+        setServices(services.filter(s => s.id !== id));
       };
-
-      if (loading) return <div className="p-10 text-gray-500">Carregando serviços...</div>;
 
       return (
         <div className="p-6 md:p-10 fade-in">
@@ -317,70 +194,34 @@
       );
     };
 
-    // --- Dashboard with Enhanced Metrics ---
-    const Dashboard = ({ db, appId }) => {
-      const [stats, setStats] = useState({
-        todayRevenue: 0,
-        predictedRevenue: 0,
-        pendingCount: 0,
-        todayAppointments: 0,
+    // --- Enhanced Dashboard ---
+    const Dashboard = () => {
+      const servicesMap = {};
+      mockServices.forEach(s => {
+        servicesMap[s.name] = s.price;
       });
-      const [servicesMap, setServicesMap] = useState({});
 
-      // Load services to map prices
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(
-          collection(db, 'artifacts', appId, 'public', 'data', 'services'),
-          (snapshot) => {
-            const map = {};
-            snapshot.docs.forEach(doc => {
-              const data = doc.data();
-              map[data.name] = data.price || 0;
-            });
-            setServicesMap(map);
+      const today = new Date().toISOString().split('T')[0];
+      let todayRevenue = 0;
+      let predictedRevenue = 0;
+      let pendingCount = 0;
+      let todayAppointments = 0;
+
+      mockAppointments.forEach(appt => {
+        const price = servicesMap[appt.service] || 0;
+        if (appt.date === today) {
+          todayAppointments++;
+          if (appt.status === 'realizado') {
+            todayRevenue += price;
           }
-        );
-        return () => unsubscribe();
-      }, [db, appId]);
-
-      // Calculate metrics
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(
-          collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
-          (snapshot) => {
-            const today = new Date().toISOString().split('T')[0];
-            let todayRevenue = 0;
-            let predictedRevenue = 0;
-            let pendingCount = 0;
-            let todayAppointments = 0;
-
-            snapshot.forEach(doc => {
-              const appt = doc.data();
-              const price = servicesMap[appt.service] || 0;
-
-              if (appt.date === today) {
-                todayAppointments++;
-                if (appt.status === 'realizado') {
-                  todayRevenue += price;
-                }
-              }
-
-              if ((appt.status === 'pendente' || appt.status === 'confirmado') && appt.date >= today) {
-                predictedRevenue += price;
-              }
-
-              if (appt.status === 'pendente') {
-                pendingCount++;
-              }
-            });
-
-            setStats({ todayRevenue, predictedRevenue, pendingCount, todayAppointments });
-          }
-        );
-        return () => unsubscribe();
-      }, [db, appId, servicesMap]);
+        }
+        if ((appt.status === 'pendente' || appt.status === 'confirmado') && appt.date >= today) {
+          predictedRevenue += price;
+        }
+        if (appt.status === 'pendente') {
+          pendingCount++;
+        }
+      });
 
       return (
         <div className="p-6 md:p-10 fade-in">
@@ -388,335 +229,127 @@
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500">
               <p className="text-gray-400 text-sm uppercase">Agendamentos Hoje</p>
-              <h3 className="text-3xl font-bold mt-2">{stats.todayAppointments}</h3>
+              <h3 className="text-3xl font-bold mt-2">{todayAppointments}</h3>
             </div>
             <div className="glass-panel p-6 rounded-xl border-l-4 border-yellow-500">
               <p className="text-gray-400 text-sm uppercase">Pendentes</p>
-              <h3 className="text-3xl font-bold mt-2 text-yellow-500">{stats.pendingCount}</h3>
+              <h3 className="text-3xl font-bold mt-2 text-yellow-500">{pendingCount}</h3>
             </div>
             <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500">
               <p className="text-gray-400 text-sm uppercase">Faturamento Hoje</p>
-              <h3 className="text-3xl font-bold mt-2 text-green-500">R$ {stats.todayRevenue.toFixed(2)}</h3>
+              <h3 className="text-3xl font-bold mt-2 text-green-500">R$ {todayRevenue.toFixed(2)}</h3>
             </div>
             <div className="glass-panel p-6 rounded-xl border-l-4 border-purple-500">
               <p className="text-gray-400 text-sm uppercase">Previsão de Faturamento</p>
-              <h3 className="text-3xl font-bold mt-2 text-purple-400">R$ {stats.predictedRevenue.toFixed(2)}</h3>
+              <h3 className="text-3xl font-bold mt-2 text-purple-400">R$ {predictedRevenue.toFixed(2)}</h3>
             </div>
           </div>
         </div>
       );
     };
 
-    // --- Client Booking ---
-    const ClientBooking = ({ db, appId, onAdminLogin }) => {
-      const [step, setStep] = useState(1);
-      const [formData, setFormData] = useState({ name: '', phone: '', service: null, date: '', time: '' });
-      const [loading, setLoading] = useState(false);
-      const [success, setSuccess] = useState(false);
-      const [services, setServices] = useState([]);
-      const [appointments, setAppointments] = useState([]);
-
-      const timeSlots = ['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
-
-      // Load services
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(
-          collection(db, 'artifacts', appId, 'public', 'data', 'services'),
-          (snapshot) => {
-            const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setServices(list);
-          }
-        );
-        return () => unsubscribe();
-      }, [db, appId]);
-
-      // Load appointments for date
-      useEffect(() => {
-        if (!db || !formData.date) return;
-        const { collection, query, where, onSnapshot } = window.firebaseModules;
-        const q = query(
-          collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
-          where('date', '==', formData.date)
-        );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          setAppointments(snapshot.docs.map(d => d.data().time));
-        });
-        return () => unsubscribe();
-      }, [db, formData.date]);
-
-      const handleSubmit = async () => {
-        setLoading(true);
-        const { collection, addDoc, query, where, getDocs } = window.firebaseModules;
-        try {
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), {
-            ...formData,
-            status: 'pendente',
-            createdAt: new Date().toISOString()
-          });
-
-          const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
-          const q = query(clientsRef, where("phone", "==", formData.phone));
-          const querySnapshot = await getDocs(q);
-          if (querySnapshot.empty) {
-            await addDoc(clientsRef, {
-              name: formData.name,
-              phone: formData.phone,
-              totalVisits: 0,
-              joinedAt: new Date().toISOString()
-            });
-          }
-          setSuccess(true);
-        } catch (error) {
-          console.error("Error booking:", error);
-          alert("Erro ao agendar. Tente novamente.");
-        }
-        setLoading(false);
-      };
-
-      if (success) return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="glass-panel max-w-md w-full p-8 rounded-2xl text-center fade-in">
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i className="fa-solid fa-check text-3xl text-green-500"></i>
-            </div>
-            <h2 className="heading-font text-2xl text-white mb-2">Agendamento Confirmado!</h2>
-            <p className="text-gray-400 mb-6">Te aguardamos, {formData.name}.</p>
-            <button
-              onClick={() => { setSuccess(false); setStep(1); setFormData({ name: '', phone: '', service: null, date: '', time: '' }) }}
-              className="btn-primary w-full py-3 rounded-lg font-bold"
-            >
-              Novo Agendamento
-            </button>
-          </div>
-        </div>
-      );
-
-      return (
-        <div className="min-h-screen p-4 flex flex-col items-center justify-center relative">
-          <button onClick={onAdminLogin} className="absolute top-4 right-4 text-xs text-gray-600 hover:text-gold uppercase tracking-widest">
-            Área do Profissional
-          </button>
-          <div className="glass-panel max-w-lg w-full rounded-2xl p-6 md:p-10 shadow-2xl border-t border-white/10">
-            <div className="text-center mb-8">
-              <h1 className="heading-font text-3xl font-bold text-gold mb-1">BARBER<span className="text-white">PRO</span></h1>
-              <p className="text-sm text-gray-500">Agende seu horário com estilo</p>
-            </div>
-
-            {/* Step Indicators */}
-            <div className="flex justify-between mb-8 relative">
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#333] -z-10"></div>
-              {[1, 2, 3].map(s => (
-                <div
-                  key={s}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold-primary text-black scale-110' : 'bg-[#333] text-gray-500'}`}
-                  style={{ backgroundColor: step >= s ? '#D4AF37' : '#333' }}
-                >
-                  {s}
-                </div>
-              ))}
-            </div>
-
-            {/* Step 1: Info */}
-            {step === 1 && (
-              <div className="space-y-4 fade-in">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Nome Completo</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                    placeholder="Seu nome"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Telefone (WhatsApp)</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                    placeholder="(00) 00000-0000"
-                  />
-                </div>
-                <button
-                  disabled={!formData.name || !formData.phone}
-                  onClick={() => setStep(2)}
-                  className="w-full btn-primary py-3 rounded-lg font-bold mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Próximo <i className="fa-solid fa-arrow-right ml-2"></i>
-                </button>
+    // --- Simple Placeholder Views ---
+    const Schedule = () => (
+      <div className="p-10 fade-in">
+        <h2 className="heading-font text-3xl mb-6">Agenda</h2>
+        <div className="space-y-4">
+          {mockAppointments.map(appt => (
+            <div key={appt.id} className="glass-panel p-4 rounded-xl flex justify-between">
+              <div>
+                <h4 className="font-bold">{appt.name}</h4>
+                <p className="text-sm text-gray-400">{appt.service} - {appt.date} às {appt.time}</p>
               </div>
-            )}
-
-            {/* Step 2: Service */}
-            {step === 2 && (
-              <div className="fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  {services.map(s => (
-                    <div
-                      key={s.name}
-                      onClick={() => setFormData({ ...formData, service: s.name })}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                        formData.service === s.name ? 'border-gold bg-yellow-500/10' : 'border-[#333] bg-[#1a1a1a] hover:border-gray-500'
-                      }`}
-                    >
-                      <i className={`fa-solid ${s.icon} text-2xl mb-2 ${formData.service === s.name ? 'text-gold' : 'text-gray-400'}`}></i>
-                      <h3 className="font-bold text-sm">{s.name}</h3>
-                      <p className="text-xs text-gray-400">R$ {s.price?.toFixed(2)}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={() => setStep(1)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400 hover:text-white">Voltar</button>
-                  <button
-                    disabled={!formData.service}
-                    onClick={() => setStep(3)}
-                    className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50"
-                  >
-                    Próximo
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Date & Time */}
-            {step === 3 && (
-              <div className="fade-in">
-                <div className="mb-4">
-                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Data</label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    min={new Date().toISOString().split('T')[0]}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value, time: '' })}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                  />
-                </div>
-                {formData.date && (
-                  <div className="mb-6">
-                    <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wider">Horários Disponíveis</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {timeSlots.map(time => {
-                        const isTaken = appointments.includes(time);
-                        return (
-                          <button
-                            key={time}
-                            disabled={isTaken}
-                            onClick={() => setFormData({ ...formData, time })}
-                            className={`py-2 rounded text-sm ${
-                              isTaken
-                                ? 'bg-[#222] text-[#444] cursor-not-allowed line-through'
-                                : formData.time === time
-                                ? 'bg-gold-primary text-black font-bold'
-                                : 'bg-[#1a1a1a] border border-[#333] hover:border-gold'
-                            }`}
-                          >
-                            {time}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                <div className="flex gap-3">
-                  <button onClick={() => setStep(2)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400 hover:text-white">Voltar</button>
-                  <button
-                    disabled={!formData.date || !formData.time || loading}
-                    onClick={handleSubmit}
-                    className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Confirmar'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    };
-
-    // --- Other Admin Components (Simplified for brevity but functional) ---
-    const Schedule = ({ db, appId }) => {
-      const [appointments, setAppointments] = useState([]);
-      const [filter, setFilter] = useState('today');
-
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
-          let data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          data.sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
-          const today = new Date().toISOString().split('T')[0];
-          if (filter === 'today') data = data.filter(d => d.date === today);
-          else if (filter === 'pending') data = data.filter(d => d.status === 'pendente');
-          setAppointments(data);
-        });
-        return () => unsubscribe();
-      }, [db, appId, filter]);
-
-      const updateStatus = async (id, status) => {
-        const { doc, updateDoc } = window.firebaseModules;
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', id), { status });
-      };
-
-      return (
-        <div className="p-6 md:p-10 fade-in">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="heading-font text-3xl">Agenda</h2>
-            <div className="flex bg-[#1E1E1E] rounded-lg p-1 border border-[#333]">
-              {['today', 'pending', 'all'].map(f => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={`px-4 py-1.5 rounded text-xs uppercase font-bold transition ${filter === f ? 'bg-[#333] text-white' : 'text-gray-500'}`}
-                >
-                  {f === 'today' ? 'Hoje' : f === 'pending' ? 'Pendentes' : 'Todos'}
-                </button>
-              ))}
+              <span className={`px-3 py-1 rounded text-xs ${
+                appt.status === 'realizado' ? 'bg-green-500/20 text-green-500' :
+                appt.status === 'confirmado' ? 'bg-blue-500/20 text-blue-500' :
+                'bg-yellow-500/20 text-yellow-500'
+              }`}>
+                {appt.status}
+              </span>
             </div>
-          </div>
-          <div className="space-y-3">
-            {appointments.length === 0 ? (
-              <div className="text-center text-gray-500 mt-10">Nenhum agendamento</div>
-            ) : (
-              appointments.map(app => (
-                <div key={app.id} className="glass-panel p-4 rounded-xl flex justify-between items-center">
-                  <div>
-                    <h4 className="font-bold">{app.name}</h4>
-                    <p className="text-sm text-gray-400">{app.service} - {app.date} às {app.time}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded text-xs ${
-                    app.status === 'realizado' ? 'bg-green-500/20 text-green-500' :
-                    app.status === 'confirmado' ? 'bg-blue-500/20 text-blue-500' :
-                    app.status === 'pendente' ? 'bg-yellow-500/20 text-yellow-500' :
-                    'bg-red-500/20 text-red-500'
-                  }`}>
-                    {app.status}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
+          ))}
         </div>
-      );
-    };
-
-    const ClientList = () => (
-      <div className="p-10 text-gray-500">Clientes (em breve com integração completa)</div>
+      </div>
     );
 
+    const ClientList = () => (
+      <div className="p-10 fade-in">
+        <h2 className="heading-font text-3xl mb-6">Clientes</h2>
+        <div className="text-gray-500">Funcionalidade em demonstração.</div>
+      </div>
+    );
+
+    // --- Navigation ---
+    const Navigation = ({ activeTab, setActiveTab, onLogout }) => {
+      const menuItems = [
+        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
+        { id: 'schedule', icon: 'fa-calendar-days', label: 'Agenda' },
+        { id: 'clients', icon: 'fa-users', label: 'Clientes' },
+        { id: 'services', icon: 'fa-scissors', label: 'Serviços' },
+      ];
+
+      return (
+        <>
+          <div className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 glass-panel border-r border-[#333] z-20">
+            <div className="p-8 text-center border-b border-[#333]">
+              <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">
+                BARBER<span className="text-white">PRO</span>
+              </h1>
+            </div>
+            <nav className="flex-1 py-6 px-4 space-y-2">
+              {menuItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
+                    activeTab === item.id
+                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg'
+                      : 'text-gray-400 hover:bg-[#333] hover:text-white'
+                  }`}
+                >
+                  <i className={`fa-solid ${item.icon} w-6`}></i>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="p-4 border-t border-[#333]">
+              <button onClick={onLogout} className="w-full flex items-center p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition">
+                <i className="fa-solid fa-right-from-bracket w-6"></i>
+                <span>Sair</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#1E1E1E] border-t border-[#333] flex justify-around p-3 z-50">
+            {menuItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex flex-col items-center text-xs ${activeTab === item.id ? 'text-gold' : 'text-gray-500'}`}
+              >
+                <i className={`fa-solid ${item.icon} text-lg mb-1`}></i>
+                {item.label}
+              </button>
+            ))}
+            <button onClick={onLogout} className="flex flex-col items-center text-xs text-red-400">
+              <i className="fa-solid fa-right-from-bracket text-lg mb-1"></i> Sair
+            </button>
+          </div>
+        </>
+      );
+    };
+
     // --- Admin Layout ---
-    const AdminLayout = ({ db, appId, onLogout }) => {
+    const AdminLayout = ({ onLogout }) => {
       const [activeTab, setActiveTab] = useState('dashboard');
 
       const renderContent = () => {
         switch (activeTab) {
-          case 'dashboard': return <Dashboard db={db} appId={appId} />;
-          case 'schedule': return <Schedule db={db} appId={appId} />;
+          case 'dashboard': return <Dashboard />;
+          case 'schedule': return <Schedule />;
           case 'clients': return <ClientList />;
-          case 'services': return <ServicesConfig db={db} appId={appId} />;
-          default: return <Dashboard db={db} appId={appId} />;
+          case 'services': return <ServicesConfig />;
+          default: return <Dashboard />;
         }
       };
 
@@ -773,22 +406,48 @@
       );
     };
 
+    // --- Client Booking (Simplified) ---
+    const ClientBooking = ({ onAdminLogin }) => (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#121212]">
+        <div className="text-center text-white max-w-md mx-auto">
+          <h1 className="heading-font text-3xl mb-2">Barber<span className="text-gold">Pro</span></h1>
+          <p className="mb-6">Sistema de agendamento em demonstração</p>
+          <div className="space-y-3 mb-8">
+            {mockServices.map(s => (
+              <div key={s.id} className="glass-panel p-4 text-left">
+                <div className="flex items-center gap-3">
+                  <i className={`fa-solid ${s.icon} text-gold`}></i>
+                  <div>
+                    <h4 className="font-bold">{s.name}</h4>
+                    <p className="text-green-400">R$ {s.price.toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={onAdminLogin}
+            className="btn-primary px-6 py-3 rounded-lg font-bold"
+          >
+            Acessar Área do Profissional
+          </button>
+        </div>
+      </div>
+    );
+
     // --- Main App ---
     const App = () => {
-      const { db, auth, user, appId } = useFirebase();
       const [view, setView] = useState('client'); // 'client', 'login', 'admin'
-
-      if (!db || !user) return <Loading />;
 
       if (view === 'login') {
         return <AdminLogin onLogin={() => setView('admin')} onBack={() => setView('client')} />;
       }
 
       if (view === 'admin') {
-        return <AdminLayout db={db} appId={appId} onLogout={() => setView('client')} />;
+        return <AdminLayout onLogout={() => setView('client')} />;
       }
 
-      return <ClientBooking db={db} appId={appId} onAdminLogin={() => setView('login')} />;
+      return <ClientBooking onAdminLogin={() => setView('login')} />;
     };
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
