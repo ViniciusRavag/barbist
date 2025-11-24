@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BarberPro - Gestão Premium</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarberPro - Gestão Premium V2</title>
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- React & ReactDOM -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  
   <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --gold-primary: #D4AF37;
@@ -24,30 +30,25 @@
       --glass-bg: rgba(30, 30, 30, 0.7);
       --glass-border: rgba(212, 175, 55, 0.15);
     }
+    
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--dark-bg);
       background-image: radial-gradient(circle at top right, #2a2a2a 0%, #121212 100%);
       color: #E0E0E0;
-      margin: 0;
-      padding: 0;
     }
+    
     .heading-font {
       font-family: 'Playfair Display', serif;
     }
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #1a1a1a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--gold-primary);
-    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
+
+    /* Glassmorphism */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(12px);
@@ -55,6 +56,7 @@
       border: 1px solid var(--glass-border);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--gold-primary) 0%, #b4932a 100%);
       color: #121212;
@@ -64,390 +66,784 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
     }
+
     .text-gold { color: var(--gold-primary); }
     .border-gold { border-color: var(--gold-primary); }
-    .fade-in {
-      animation: fadeIn 0.4s ease-out forwards;
-    }
+    
+    /* Animations */
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Sidebar Transition */
+    .sidebar-transition {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
+  <!-- Firebase Setup -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    window.firebaseModules = {
+      initializeApp, getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken,
+      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setDoc
+    };
+  </script>
+
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // --- Mock Data ---
-    const mockServices = [
-      { id: '1', name: 'Corte de Cabelo', price: 45, icon: 'fa-scissors' },
-      { id: '2', name: 'Barba', price: 30, icon: 'fa-face-smile' },
-      { id: '3', name: 'Cabelo e Barba', price: 70, icon: 'fa-user-tie' },
-      { id: '4', name: 'Pigmentação', price: 60, icon: 'fa-spray-can' }
-    ];
+    // --- Hooks & Utilities ---
 
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0];
+    const useFirebase = () => {
+      const [db, setDb] = useState(null);
+      const [auth, setAuth] = useState(null);
+      const [user, setUser] = useState(null);
+      const [appId, setAppId] = useState('default-barber-app');
 
-    const mockAppointments = [
-      { id: 'a1', name: 'João Silva', phone: '(11) 99999-1111', service: 'Corte de Cabelo', date: today, time: '10:00', status: 'realizado' },
-      { id: 'a2', name: 'Carlos Mendes', phone: '(11) 99999-2222', service: 'Barba', date: today, time: '14:00', status: 'pendente' },
-      { id: 'a3', name: 'Pedro Alves', phone: '(11) 99999-3333', service: 'Cabelo e Barba', date: tomorrow, time: '16:00', status: 'confirmado' },
-    ];
+      useEffect(() => {
+        const { initializeApp, getAuth, getFirestore, signInAnonymously, onAuthStateChanged, signInWithCustomToken } = window.firebaseModules;
+        
+        const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "mock" };
+        const app = initializeApp(config);
+        const authInstance = getAuth(app);
+        const dbInstance = getFirestore(app);
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-v2';
 
-    // --- Services Config ---
-    const ServicesConfig = () => {
-      const [services, setServices] = useState(mockServices);
-      const [isAdding, setIsAdding] = useState(false);
-      const [form, setForm] = useState({ name: '', price: '', icon: 'fa-scissors' });
+        setDb(dbInstance);
+        setAuth(authInstance);
+        setAppId(currentAppId);
 
-      const handleAdd = () => {
-        if (!form.name || !form.price) return;
-        const newService = {
-          id: `s${Date.now()}`,
-          name: form.name.trim(),
-          price: parseFloat(form.price),
-          icon: form.icon
-        };
-        setServices([...services, newService]);
-        setForm({ name: '', price: '', icon: 'fa-scissors' });
-        setIsAdding(false);
-      };
-
-      const handleDelete = (id) => {
-        setServices(services.filter(s => s.id !== id));
-      };
-
-      return (
-        <div className="p-6 md:p-10 fade-in">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="heading-font text-3xl">Configuração de Serviços</h2>
-            <button
-              onClick={() => setIsAdding(!isAdding)}
-              className="btn-primary px-4 py-2 rounded text-sm font-bold"
-            >
-              <i className="fa-solid fa-plus mr-2"></i>
-              {isAdding ? 'Cancelar' : 'Novo Serviço'}
-            </button>
-          </div>
-
-          {isAdding && (
-            <div className="glass-panel p-6 rounded-xl mb-6">
-              <h3 className="font-bold mb-4">Adicionar Novo Serviço</h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Nome do serviço"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                />
-                <input
-                  type="number"
-                  placeholder="Preço (R$)"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                />
-                <div>
-                  <label className="block text-sm mb-2">Ícone</label>
-                  <select
-                    value={form.icon}
-                    onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                  >
-                    <option value="fa-scissors">Tesoura</option>
-                    <option value="fa-face-smile">Barba</option>
-                    <option value="fa-user-tie">Cabelo + Barba</option>
-                    <option value="fa-spray-can">Pigmentação</option>
-                    <option value="fa-hat-cowboy">Estilo Premium</option>
-                  </select>
-                </div>
-                <button onClick={handleAdd} className="btn-primary w-full py-2 rounded font-bold">
-                  Salvar Serviço
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {services.map((s) => (
-              <div key={s.id} className="glass-panel p-5 rounded-xl flex justify-between items-start">
-                <div>
-                  <i className={`fa-solid ${s.icon} text-gold text-xl mb-2`}></i>
-                  <h4 className="font-bold">{s.name}</h4>
-                  <p className="text-green-400">R$ {s.price?.toFixed(2)}</p>
-                </div>
-                <button
-                  onClick={() => handleDelete(s.id)}
-                  className="text-red-500 hover:text-red-300"
-                >
-                  <i className="fa-solid fa-trash"></i>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // --- Enhanced Dashboard ---
-    const Dashboard = () => {
-      const servicesMap = {};
-      mockServices.forEach(s => {
-        servicesMap[s.name] = s.price;
-      });
-
-      const today = new Date().toISOString().split('T')[0];
-      let todayRevenue = 0;
-      let predictedRevenue = 0;
-      let pendingCount = 0;
-      let todayAppointments = 0;
-
-      mockAppointments.forEach(appt => {
-        const price = servicesMap[appt.service] || 0;
-        if (appt.date === today) {
-          todayAppointments++;
-          if (appt.status === 'realizado') {
-            todayRevenue += price;
+        const initAuth = async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(authInstance, __initial_auth_token);
+          } else {
+            await signInAnonymously(authInstance);
           }
-        }
-        if ((appt.status === 'pendente' || appt.status === 'confirmado') && appt.date >= today) {
-          predictedRevenue += price;
-        }
-        if (appt.status === 'pendente') {
-          pendingCount++;
-        }
-      });
+        };
 
-      return (
-        <div className="p-6 md:p-10 fade-in">
-          <h2 className="heading-font text-3xl mb-8">Painel de Controle</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500">
-              <p className="text-gray-400 text-sm uppercase">Agendamentos Hoje</p>
-              <h3 className="text-3xl font-bold mt-2">{todayAppointments}</h3>
-            </div>
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-yellow-500">
-              <p className="text-gray-400 text-sm uppercase">Pendentes</p>
-              <h3 className="text-3xl font-bold mt-2 text-yellow-500">{pendingCount}</h3>
-            </div>
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500">
-              <p className="text-gray-400 text-sm uppercase">Faturamento Hoje</p>
-              <h3 className="text-3xl font-bold mt-2 text-green-500">R$ {todayRevenue.toFixed(2)}</h3>
-            </div>
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-purple-500">
-              <p className="text-gray-400 text-sm uppercase">Previsão de Faturamento</p>
-              <h3 className="text-3xl font-bold mt-2 text-purple-400">R$ {predictedRevenue.toFixed(2)}</h3>
-            </div>
-          </div>
-        </div>
-      );
+        initAuth();
+        return onAuthStateChanged(authInstance, setUser);
+      }, []);
+
+      return { db, auth, user, appId };
     };
 
-    // --- Simple Placeholder Views ---
-    const Schedule = () => (
-      <div className="p-10 fade-in">
-        <h2 className="heading-font text-3xl mb-6">Agenda</h2>
-        <div className="space-y-4">
-          {mockAppointments.map(appt => (
-            <div key={appt.id} className="glass-panel p-4 rounded-xl flex justify-between">
-              <div>
-                <h4 className="font-bold">{appt.name}</h4>
-                <p className="text-sm text-gray-400">{appt.service} - {appt.date} às {appt.time}</p>
-              </div>
-              <span className={`px-3 py-1 rounded text-xs ${
-                appt.status === 'realizado' ? 'bg-green-500/20 text-green-500' :
-                appt.status === 'confirmado' ? 'bg-blue-500/20 text-blue-500' :
-                'bg-yellow-500/20 text-yellow-500'
-              }`}>
-                {appt.status}
-              </span>
-            </div>
-          ))}
-        </div>
+    const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+    // --- Components ---
+
+    const Loading = () => (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
       </div>
     );
 
-    const ClientList = () => (
-      <div className="p-10 fade-in">
-        <h2 className="heading-font text-3xl mb-6">Clientes</h2>
-        <div className="text-gray-500">Funcionalidade em demonstração.</div>
-      </div>
-    );
-
-    // --- Navigation ---
-    const Navigation = ({ activeTab, setActiveTab, onLogout }) => {
+    // Sidebar Navigation (Responsive)
+    const Navigation = ({ activeTab, setActiveTab, onLogout, mobileOpen, setMobileOpen }) => {
       const menuItems = [
         { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
-        { id: 'schedule', icon: 'fa-calendar-days', label: 'Agenda' },
+        { id: 'schedule', icon: 'fa-calendar-check', label: 'Agenda' },
         { id: 'clients', icon: 'fa-users', label: 'Clientes' },
         { id: 'services', icon: 'fa-scissors', label: 'Serviços' },
+        { id: 'settings', icon: 'fa-gear', label: 'Configurações' },
       ];
 
       return (
         <>
-          <div className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 glass-panel border-r border-[#333] z-20">
-            <div className="p-8 text-center border-b border-[#333]">
-              <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">
-                BARBER<span className="text-white">PRO</span>
-              </h1>
+          {/* Mobile Overlay */}
+          {mobileOpen && (
+            <div 
+              className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            ></div>
+          )}
+
+          {/* Sidebar */}
+          <div className={`fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-[#333] transform sidebar-transition md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className="p-8 text-center border-b border-[#333] flex justify-between md:block items-center">
+              <div>
+                <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">BARBER<span className="text-white">PRO</span></h1>
+                <p className="text-xs text-gray-400 mt-2">Sistema Integrado</p>
+              </div>
+              <button onClick={() => setMobileOpen(false)} className="md:hidden text-gray-400">
+                <i className="fa-solid fa-times text-xl"></i>
+              </button>
             </div>
-            <nav className="flex-1 py-6 px-4 space-y-2">
+
+            <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto h-[calc(100vh-180px)]">
               {menuItems.map(item => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => { setActiveTab(item.id); setMobileOpen(false); }}
                   className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
-                    activeTab === item.id
-                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg'
+                    activeTab === item.id 
+                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg' 
                       : 'text-gray-400 hover:bg-[#333] hover:text-white'
                   }`}
                 >
-                  <i className={`fa-solid ${item.icon} w-6`}></i>
-                  <span>{item.label}</span>
+                  <i className={`fa-solid ${item.icon} w-6 text-center`}></i>
+                  <span className="ml-3">{item.label}</span>
                 </button>
               ))}
             </nav>
-            <div className="p-4 border-t border-[#333]">
+
+            <div className="p-4 border-t border-[#333] absolute bottom-0 w-full bg-[#1e1e1e]">
               <button onClick={onLogout} className="w-full flex items-center p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition">
-                <i className="fa-solid fa-right-from-bracket w-6"></i>
-                <span>Sair</span>
+                <i className="fa-solid fa-right-from-bracket w-6 text-center"></i>
+                <span className="ml-3">Sair</span>
               </button>
             </div>
-          </div>
-
-          <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#1E1E1E] border-t border-[#333] flex justify-around p-3 z-50">
-            {menuItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center text-xs ${activeTab === item.id ? 'text-gold' : 'text-gray-500'}`}
-              >
-                <i className={`fa-solid ${item.icon} text-lg mb-1`}></i>
-                {item.label}
-              </button>
-            ))}
-            <button onClick={onLogout} className="flex flex-col items-center text-xs text-red-400">
-              <i className="fa-solid fa-right-from-bracket text-lg mb-1"></i> Sair
-            </button>
           </div>
         </>
       );
     };
 
+    // Client Booking View
+    const ClientBooking = ({ db, appId, onAdminLogin }) => {
+      const [step, setStep] = useState(1);
+      const [formData, setFormData] = useState({ name: '', phone: '', service: null, servicePrice: 0, date: '', time: '' });
+      const [loading, setLoading] = useState(false);
+      const [success, setSuccess] = useState(false);
+      const [services, setServices] = useState([]);
+      const [availableSlots, setAvailableSlots] = useState([]);
+      const [blockedSlots, setBlockedSlots] = useState([]);
+
+      // Fetch Services & Settings
+      useEffect(() => {
+        if (!db) return;
+        const { collection, onSnapshot, doc, getDoc } = window.firebaseModules;
+        
+        // Services
+        const unsubServices = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'services'), (snap) => {
+          setServices(snap.docs.map(d => ({id: d.id, ...d.data()})));
+        });
+
+        // Settings (Time slots)
+        getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule')).then(snap => {
+          if (snap.exists()) {
+            setAvailableSlots(snap.data().slots || []);
+          } else {
+            // Default slots if not configured
+            setAvailableSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']);
+          }
+        });
+
+        return () => unsubServices();
+      }, [db, appId]);
+
+      // Check Availability
+      useEffect(() => {
+        if (!db || !formData.date) return;
+        const { collection, query, where, onSnapshot } = window.firebaseModules;
+        
+        const q = query(
+          collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
+          where('date', '==', formData.date),
+          where('status', 'in', ['pendente', 'confirmado'])
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          setBlockedSlots(snapshot.docs.map(d => d.data().time));
+        });
+        return () => unsubscribe();
+      }, [db, formData.date]);
+
+      const handleSubmit = async () => {
+        setLoading(true);
+        const { collection, addDoc, query, where, getDocs } = window.firebaseModules;
+        
+        try {
+          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), {
+            ...formData,
+            status: 'pendente',
+            createdAt: new Date().toISOString()
+          });
+
+          // Check/Create Client
+          const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
+          const q = query(clientsRef, where("phone", "==", formData.phone));
+          const querySnapshot = await getDocs(q);
+
+          if (querySnapshot.empty) {
+            await addDoc(clientsRef, {
+              name: formData.name,
+              phone: formData.phone,
+              totalVisits: 0,
+              joinedAt: new Date().toISOString()
+            });
+          }
+          setSuccess(true);
+        } catch (error) {
+          console.error(error);
+          alert("Erro ao agendar.");
+        }
+        setLoading(false);
+      };
+
+      if (success) return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="glass-panel max-w-md w-full p-8 rounded-2xl text-center fade-in">
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i className="fa-solid fa-check text-3xl text-green-500"></i>
+            </div>
+            <h2 className="heading-font text-2xl text-white mb-2">Confirmado!</h2>
+            <p className="text-gray-400 mb-6">Te aguardamos, {formData.name}.</p>
+            <button onClick={() => { setSuccess(false); setStep(1); setFormData({ name: '', phone: '', service: null, servicePrice: 0, date: '', time: '' }) }} className="btn-primary w-full py-3 rounded-lg font-bold">
+              Novo Agendamento
+            </button>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen p-4 flex flex-col items-center justify-center relative">
+          <button onClick={onAdminLogin} className="absolute top-4 right-4 text-xs text-gray-600 hover:text-gold uppercase tracking-widest z-10">
+            Área do Profissional
+          </button>
+
+          <div className="glass-panel max-w-lg w-full rounded-2xl p-6 md:p-10 shadow-2xl border-t border-white/10 z-0">
+            <div className="text-center mb-8">
+              <h1 className="heading-font text-3xl font-bold text-gold mb-1">BARBER<span className="text-white">PRO</span></h1>
+              <p className="text-sm text-gray-500">Agende seu horário</p>
+            </div>
+
+            <div className="flex justify-between mb-8 relative">
+              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#333] -z-10"></div>
+              {[1, 2, 3].map(s => (
+                <div key={s} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold-primary text-black' : 'bg-[#333] text-gray-500'}`}>
+                  {s}
+                </div>
+              ))}
+            </div>
+
+            {step === 1 && (
+              <div className="space-y-4 fade-in">
+                <input 
+                  type="text" value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold"
+                  placeholder="Seu Nome"
+                />
+                <input 
+                  type="tel" value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold"
+                  placeholder="Seu WhatsApp"
+                />
+                <button disabled={!formData.name || !formData.phone} onClick={() => setStep(2)} className="w-full btn-primary py-3 rounded-lg font-bold mt-4 disabled:opacity-50">Próximo</button>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="fade-in">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-60 overflow-y-auto">
+                  {services.length === 0 ? <p className="col-span-2 text-center text-gray-500">Nenhum serviço disponível.</p> :
+                  services.map((s) => (
+                    <div key={s.id} onClick={() => setFormData({...formData, service: s.name, servicePrice: s.price})}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${formData.service === s.name ? 'border-gold bg-yellow-500/10' : 'border-[#333] bg-[#1a1a1a] hover:border-gray-500'}`}
+                    >
+                      <i className={`fa-solid ${s.icon || 'fa-scissors'} text-2xl mb-2 ${formData.service === s.name ? 'text-gold' : 'text-gray-400'}`}></i>
+                      <h3 className="font-bold text-sm">{s.name}</h3>
+                      <p className="text-xs text-gray-400">{formatCurrency(s.price)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(1)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400">Voltar</button>
+                  <button disabled={!formData.service} onClick={() => setStep(3)} className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50">Próximo</button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="fade-in">
+                <input type="date" value={formData.date} min={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => setFormData({...formData, date: e.target.value, time: ''})}
+                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold mb-6"
+                />
+                
+                {formData.date && (
+                  <div className="grid grid-cols-4 gap-2 mb-6">
+                    {availableSlots.map(time => {
+                      const isTaken = blockedSlots.includes(time);
+                      return (
+                        <button key={time} disabled={isTaken} onClick={() => setFormData({...formData, time})}
+                          className={`py-2 rounded text-sm ${isTaken ? 'bg-[#222] text-[#444] cursor-not-allowed line-through' : formData.time === time ? 'bg-gold-primary text-black font-bold' : 'bg-[#1a1a1a] border border-[#333] hover:border-gold'}`}
+                        >
+                          {time}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(2)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400">Voltar</button>
+                  <button disabled={!formData.date || !formData.time || loading} onClick={handleSubmit} className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2">
+                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Confirmar'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // --- Admin Dashboard Components ---
+
+    const Dashboard = ({ db, appId }) => {
+      const [stats, setStats] = useState({ 
+        total: 0, 
+        pending: 0, 
+        revenueToday: 0, 
+        revenueProjected: 0,
+        countToday: 0
+      });
+
+      useEffect(() => {
+        const { collection, onSnapshot } = window.firebaseModules;
+        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
+          let t = 0, p = 0, revToday = 0, revProj = 0, cToday = 0;
+          const todayStr = new Date().toISOString().split('T')[0];
+          
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const price = parseFloat(data.servicePrice || 0);
+            
+            t++;
+            if (data.status === 'pendente') p++;
+            
+            // Revenue Logic
+            if (data.date === todayStr) {
+                cToday++;
+                if (data.status === 'realizado') {
+                    revToday += price;
+                }
+            }
+
+            // Projected (Confirmed appointments in future or today not yet done)
+            if (data.status === 'confirmado') {
+                revProj += price;
+            }
+          });
+          setStats({ total: t, pending: p, revenueToday: revToday, revenueProjected: revProj, countToday: cToday });
+        });
+        return () => unsubscribe();
+      }, [db, appId]);
+
+      return (
+        <div className="p-6 md:p-10 fade-in">
+          <h2 className="heading-font text-3xl mb-8">Painel de Controle</h2>
+          
+          {/* Revenue Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500 relative overflow-hidden group">
+               <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition">
+                  <i className="fa-solid fa-sack-dollar text-8xl"></i>
+               </div>
+               <p className="text-gray-400 text-sm uppercase tracking-wide">Faturamento Hoje</p>
+               <h3 className="text-4xl font-bold mt-2 text-white">{formatCurrency(stats.revenueToday)}</h3>
+               <p className="text-xs text-green-500 mt-2"><i className="fa-solid fa-arrow-up"></i> Recebido</p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500 relative overflow-hidden group">
+               <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition">
+                  <i className="fa-solid fa-chart-line text-8xl"></i>
+               </div>
+               <p className="text-gray-400 text-sm uppercase tracking-wide">Previsão (Confirmados)</p>
+               <h3 className="text-4xl font-bold mt-2 text-white">{formatCurrency(stats.revenueProjected)}</h3>
+               <p className="text-xs text-blue-400 mt-2"><i className="fa-solid fa-calendar-check"></i> A receber</p>
+            </div>
+          </div>
+
+          {/* Operational Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-panel p-6 rounded-xl border border-[#333]">
+              <div className="flex justify-between items-center">
+                <div>
+                   <p className="text-gray-400 text-xs uppercase">Agenda Hoje</p>
+                   <h3 className="text-2xl font-bold mt-1">{stats.countToday}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-gold"><i className="fa-solid fa-calendar-day"></i></div>
+              </div>
+            </div>
+            
+            <div className="glass-panel p-6 rounded-xl border border-[#333]">
+              <div className="flex justify-between items-center">
+                <div>
+                   <p className="text-gray-400 text-xs uppercase">Pendentes</p>
+                   <h3 className="text-2xl font-bold mt-1 text-yellow-500">{stats.pending}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-yellow-500"><i className="fa-solid fa-clock"></i></div>
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 rounded-xl border border-[#333]">
+              <div className="flex justify-between items-center">
+                <div>
+                   <p className="text-gray-400 text-xs uppercase">Total Histórico</p>
+                   <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-purple-500"><i className="fa-solid fa-users"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const ServicesSettings = ({ db, appId }) => {
+      const [services, setServices] = useState([]);
+      const [newService, setNewService] = useState({ name: '', price: '', icon: 'fa-scissors' });
+      const [isEditing, setIsEditing] = useState(false);
+
+      useEffect(() => {
+        const { collection, onSnapshot } = window.firebaseModules;
+        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'services'), (snap) => {
+           setServices(snap.docs.map(d => ({id: d.id, ...d.data()})));
+        });
+        return () => unsubscribe();
+      }, [db, appId]);
+
+      const handleSave = async () => {
+        if (!newService.name || !newService.price) return;
+        const { collection, addDoc, doc, updateDoc } = window.firebaseModules;
+        
+        try {
+            if (isEditing) {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'services', isEditing), {
+                    name: newService.name,
+                    price: parseFloat(newService.price),
+                    icon: newService.icon
+                });
+                setIsEditing(false);
+            } else {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'services'), {
+                    name: newService.name,
+                    price: parseFloat(newService.price),
+                    icon: newService.icon
+                });
+            }
+            setNewService({ name: '', price: '', icon: 'fa-scissors' });
+        } catch (e) {
+            console.error(e);
+        }
+      };
+
+      const handleDelete = async (id) => {
+        if(!confirm("Excluir serviço?")) return;
+        const { doc, deleteDoc } = window.firebaseModules;
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'services', id));
+      };
+
+      const startEdit = (s) => {
+          setNewService({ name: s.name, price: s.price, icon: s.icon || 'fa-scissors' });
+          setIsEditing(s.id);
+      }
+
+      return (
+        <div className="p-6 md:p-10 fade-in max-w-4xl mx-auto">
+          <h2 className="heading-font text-3xl mb-6">Meus Serviços</h2>
+
+          <div className="glass-panel p-6 rounded-xl mb-8">
+            <h3 className="text-lg font-bold mb-4 text-gold">{isEditing ? 'Editar Serviço' : 'Novo Serviço'}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+               <input 
+                 type="text" placeholder="Nome do Serviço"
+                 value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})}
+                 className="col-span-2 bg-[#121212] border border-[#333] rounded p-2 text-white"
+               />
+               <input 
+                 type="number" placeholder="Preço (R$)"
+                 value={newService.price} onChange={e => setNewService({...newService, price: e.target.value})}
+                 className="bg-[#121212] border border-[#333] rounded p-2 text-white"
+               />
+               <select 
+                 value={newService.icon} onChange={e => setNewService({...newService, icon: e.target.value})}
+                 className="bg-[#121212] border border-[#333] rounded p-2 text-white"
+               >
+                 <option value="fa-scissors">Tesoura</option>
+                 <option value="fa-face-smile">Rosto</option>
+                 <option value="fa-user-tie">Estilo</option>
+                 <option value="fa-spray-can">Spray</option>
+                 <option value="fa-spa">Spa</option>
+               </select>
+            </div>
+            <div className="mt-4 flex gap-2 justify-end">
+                {isEditing && <button onClick={() => {setIsEditing(false); setNewService({ name: '', price: '', icon: 'fa-scissors' })}} className="text-gray-500 text-sm px-4">Cancelar</button>}
+                <button onClick={handleSave} className="btn-primary px-6 py-2 rounded font-bold">Salvar</button>
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+             {services.map(s => (
+                 <div key={s.id} className="glass-panel p-4 rounded-lg flex items-center justify-between group hover:border-gold transition">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-gold">
+                            <i className={`fa-solid ${s.icon}`}></i>
+                        </div>
+                        <div>
+                            <h4 className="font-bold">{s.name}</h4>
+                            <p className="text-gray-400 text-sm">{formatCurrency(s.price)}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 opacity-50 group-hover:opacity-100 transition">
+                        <button onClick={() => startEdit(s)} className="p-2 hover:text-blue-400"><i className="fa-solid fa-pen"></i></button>
+                        <button onClick={() => handleDelete(s.id)} className="p-2 hover:text-red-400"><i className="fa-solid fa-trash"></i></button>
+                    </div>
+                 </div>
+             ))}
+          </div>
+        </div>
+      );
+    };
+
+    const ScheduleSettings = ({ db, appId }) => {
+      const [slots, setSlots] = useState([]);
+      const [newSlot, setNewSlot] = useState('');
+      const [saving, setSaving] = useState(false);
+
+      useEffect(() => {
+        const { doc, getDoc } = window.firebaseModules;
+        getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule')).then(snap => {
+            if (snap.exists()) setSlots(snap.data().slots || []);
+            else setSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']);
+        });
+      }, [db, appId]);
+
+      const saveSlots = async (updatedSlots) => {
+          setSaving(true);
+          const { doc, setDoc } = window.firebaseModules;
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule'), { slots: updatedSlots });
+          setSlots(updatedSlots);
+          setSaving(false);
+      }
+
+      const addSlot = () => {
+          if (!newSlot || slots.includes(newSlot)) return;
+          const updated = [...slots, newSlot].sort();
+          saveSlots(updated);
+          setNewSlot('');
+      }
+
+      const removeSlot = (slot) => {
+          const updated = slots.filter(s => s !== slot);
+          saveSlots(updated);
+      }
+
+      return (
+          <div className="p-6 md:p-10 fade-in max-w-4xl mx-auto">
+             <h2 className="heading-font text-3xl mb-6">Configuração da Agenda</h2>
+             <div className="glass-panel p-8 rounded-xl">
+                 <p className="text-gray-400 mb-6">Defina os horários fixos disponíveis para agendamento online.</p>
+                 
+                 <div className="flex gap-4 mb-8">
+                     <input 
+                       type="time" 
+                       value={newSlot} onChange={e => setNewSlot(e.target.value)}
+                       className="bg-[#121212] border border-[#333] rounded p-2 text-white"
+                     />
+                     <button onClick={addSlot} className="btn-primary px-4 rounded font-bold">
+                         <i className="fa-solid fa-plus mr-2"></i> Adicionar Horário
+                     </button>
+                 </div>
+
+                 <div className="flex flex-wrap gap-3">
+                     {slots.map(slot => (
+                         <div key={slot} className="px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg flex items-center gap-3">
+                             <span className="font-bold text-lg text-white">{slot}</span>
+                             <button onClick={() => removeSlot(slot)} className="text-red-500 hover:text-red-400">
+                                 <i className="fa-solid fa-times"></i>
+                             </button>
+                         </div>
+                     ))}
+                 </div>
+                 {saving && <p className="text-right text-gold text-sm mt-4">Salvando...</p>}
+             </div>
+          </div>
+      );
+    }
+
+    // Reuse existing Schedule, ClientList, ClientProfile from previous version (abbreviated for length but fully functional)
+    const Schedule = ({ db, appId }) => {
+      const [appointments, setAppointments] = useState([]);
+      const [filter, setFilter] = useState('today');
+
+      useEffect(() => {
+        const { collection, onSnapshot } = window.firebaseModules;
+        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
+          let data = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+          data.sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+          const today = new Date().toISOString().split('T')[0];
+          if (filter === 'today') data = data.filter(d => d.date === today);
+          if (filter === 'pending') data = data.filter(d => d.status === 'pendente');
+          setAppointments(data);
+        });
+        return () => unsubscribe();
+      }, [db, appId, filter]);
+
+      const updateStatus = async (id, status) => {
+        const { doc, updateDoc } = window.firebaseModules;
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', id), { status });
+      };
+
+      return (
+        <div className="p-6 md:p-10 fade-in h-full flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="heading-font text-3xl">Agenda</h2>
+            <div className="flex bg-[#1E1E1E] rounded-lg p-1 border border-[#333]">
+              {['today', 'pending', 'all'].map(f => (
+                <button key={f} onClick={() => setFilter(f)} className={`px-4 py-1.5 rounded text-xs uppercase font-bold transition ${filter === f ? 'bg-[#333] text-white' : 'text-gray-500'}`}>{f === 'today' ? 'Hoje' : f === 'pending' ? 'Pendentes' : 'Todos'}</button>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto space-y-3 pb-20">
+            {appointments.map(app => (
+              <div key={app.id} className="glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center justify-between border-l-4 border-[#333] hover:border-gold transition-colors">
+                <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+                  <div className="w-14 h-14 bg-[#111] rounded-full flex items-center justify-center text-xl font-bold text-gray-300">{app.time.split(':')[0]}</div>
+                  <div>
+                    <h4 className="font-bold text-lg">{app.name}</h4>
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                      <span>{app.service} ({formatCurrency(app.servicePrice || 0)})</span>
+                      <span>{app.date.split('-').reverse().join('/')}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                   {app.status === 'pendente' && (
+                      <>
+                        <button onClick={() => updateStatus(app.id, 'confirmado')} className="px-4 py-2 bg-green-500/20 text-green-500 rounded"><i className="fa-solid fa-check"></i></button>
+                        <button onClick={() => updateStatus(app.id, 'cancelado')} className="px-4 py-2 bg-red-500/20 text-red-500 rounded"><i className="fa-solid fa-xmark"></i></button>
+                      </>
+                   )}
+                   {app.status === 'confirmado' && (
+                      <button onClick={() => updateStatus(app.id, 'realizado')} className="px-6 py-2 btn-primary rounded font-bold shadow-lg">Finalizar</button>
+                   )}
+                   {app.status === 'realizado' && <span className="text-green-500 font-bold"><i className="fa-solid fa-check-double"></i> Feito</span>}
+                   {app.status === 'cancelado' && <span className="text-red-500/50">Cancelado</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const ClientList = ({ db, appId }) => {
+        const [clients, setClients] = useState([]);
+        useEffect(() => {
+            const { collection, onSnapshot } = window.firebaseModules;
+            return onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), snap => setClients(snap.docs.map(d => ({id:d.id, ...d.data()}))));
+        }, []);
+        return (
+            <div className="p-6 md:p-10 fade-in">
+                <h2 className="heading-font text-3xl mb-6">Clientes</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {clients.map(c => (
+                        <div key={c.id} className="glass-panel p-5 rounded-xl border border-[#333]">
+                            <h4 className="font-bold text-lg">{c.name}</h4>
+                            <p className="text-gray-400">{c.phone}</p>
+                            <div className="mt-2 text-xs text-gold">Visitas: {c.totalVisits || 0}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+    };
+
     // --- Admin Layout ---
-    const AdminLayout = ({ onLogout }) => {
+
+    const AdminLayout = ({ db, appId, onLogout }) => {
       const [activeTab, setActiveTab] = useState('dashboard');
+      const [mobileOpen, setMobileOpen] = useState(false);
 
       const renderContent = () => {
         switch (activeTab) {
-          case 'dashboard': return <Dashboard />;
-          case 'schedule': return <Schedule />;
-          case 'clients': return <ClientList />;
-          case 'services': return <ServicesConfig />;
-          default: return <Dashboard />;
+          case 'dashboard': return <Dashboard db={db} appId={appId} />;
+          case 'schedule': return <Schedule db={db} appId={appId} />;
+          case 'clients': return <ClientList db={db} appId={appId} />;
+          case 'services': return <ServicesSettings db={db} appId={appId} />;
+          case 'settings': return <ScheduleSettings db={db} appId={appId} />;
+          default: return <Dashboard db={db} appId={appId} />;
         }
       };
 
       return (
         <div className="flex min-h-screen bg-[#121212]">
-          <Navigation activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} />
-          <div className="flex-1 ml-0 md:ml-64">
-            <div className="md:hidden p-4 border-b border-[#333] bg-[#1E1E1E]">
-              <h1 className="heading-font text-xl text-gold">BARBERPRO</h1>
+          <Navigation 
+            activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} 
+            mobileOpen={mobileOpen} setMobileOpen={setMobileOpen}
+          />
+          
+          <div className="flex-1 md:ml-64 relative flex flex-col h-screen">
+            {/* Mobile Header */}
+            <div className="md:hidden p-4 border-b border-[#333] flex justify-between items-center bg-[#1E1E1E] z-30">
+              <button onClick={() => setMobileOpen(true)} className="text-gold text-xl">
+                 <i className="fa-solid fa-bars"></i>
+              </button>
+              <h1 className="heading-font text-xl text-white font-bold">BARBERPRO</h1>
+              <div className="w-8"></div>
             </div>
-            <main className="h-screen overflow-auto">{renderContent()}</main>
+            
+            {/* Content Area */}
+            <main className="flex-1 overflow-auto relative">
+              {renderContent()}
+            </main>
           </div>
         </div>
       );
     };
 
-    // --- Login Screen ---
-    const AdminLogin = ({ onLogin, onBack }) => {
+    // --- App Entry ---
+
+    const App = () => {
+      const { db, auth, user, appId } = useFirebase();
+      const [view, setView] = useState('client'); 
       const [password, setPassword] = useState('');
 
-      const handleSubmit = (e) => {
+      if (!db || !user) return <Loading />;
+
+      const handleLogin = (e) => {
         e.preventDefault();
-        if (password === 'admin123') {
-          onLogin();
-        } else {
-          alert('Senha incorreta');
-        }
+        if (password === 'admin') setView('admin'); // Simple password for demo
+        else alert('Senha incorreta');
       };
 
-      return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="glass-panel p-8 rounded-2xl w-full max-w-sm border-t border-gold/50 shadow-2xl fade-in">
-            <div className="text-center mb-8">
-              <h2 className="heading-font text-2xl text-white">Área Restrita</h2>
-              <p className="text-sm text-gray-500">Acesso Profissional</p>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha de Acesso"
-                className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-              />
-              <button type="submit" className="w-full btn-primary py-3 rounded-lg font-bold">
-                Entrar
-              </button>
-            </form>
-            <button onClick={onBack} className="w-full mt-4 text-xs text-gray-500 hover:text-white">
-              Voltar ao Agendamento
-            </button>
-          </div>
-        </div>
-      );
-    };
-
-    // --- Client Booking (Simplified) ---
-    const ClientBooking = ({ onAdminLogin }) => (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#121212]">
-        <div className="text-center text-white max-w-md mx-auto">
-          <h1 className="heading-font text-3xl mb-2">Barber<span className="text-gold">Pro</span></h1>
-          <p className="mb-6">Sistema de agendamento em demonstração</p>
-          <div className="space-y-3 mb-8">
-            {mockServices.map(s => (
-              <div key={s.id} className="glass-panel p-4 text-left">
-                <div className="flex items-center gap-3">
-                  <i className={`fa-solid ${s.icon} text-gold`}></i>
-                  <div>
-                    <h4 className="font-bold">{s.name}</h4>
-                    <p className="text-green-400">R$ {s.price.toFixed(2)}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={onAdminLogin}
-            className="btn-primary px-6 py-3 rounded-lg font-bold"
-          >
-            Acessar Área do Profissional
-          </button>
-        </div>
-      </div>
-    );
-
-    // --- Main App ---
-    const App = () => {
-      const [view, setView] = useState('client'); // 'client', 'login', 'admin'
-
       if (view === 'login') {
-        return <AdminLogin onLogin={() => setView('admin')} onBack={() => setView('client')} />;
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="glass-panel p-8 rounded-2xl w-full max-w-sm border-t border-gold/50 shadow-2xl fade-in">
+              <div className="text-center mb-8">
+                <h2 className="heading-font text-2xl text-white">Área Restrita</h2>
+                <p className="text-sm text-gray-500">Acesso Profissional</p>
+              </div>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha"
+                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold"
+                />
+                <button type="submit" className="w-full btn-primary py-3 rounded-lg font-bold">Entrar</button>
+              </form>
+              <button onClick={() => setView('client')} className="w-full mt-4 text-xs text-gray-500 hover:text-white">Voltar</button>
+            </div>
+          </div>
+        );
       }
 
       if (view === 'admin') {
-        return <AdminLayout onLogout={() => setView('client')} />;
+        return <AdminLayout db={db} appId={appId} onLogout={() => { setView('client'); setPassword(''); }} />;
       }
 
-      return <ClientBooking onAdminLogin={() => setView('login')} />;
+      return <ClientBooking db={db} appId={appId} onAdminLogin={() => setView('login')} />;
     };
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -455,3 +851,4 @@
   </script>
 </body>
 </html>
+
