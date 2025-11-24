@@ -8,11 +8,11 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- React & ReactDOM -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- React & ReactDOM (Versões Estáveis) -->
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
   
-  <!-- Babel -->
+  <!-- Babel (Para traduzir o código React no navegador) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <!-- Font Awesome -->
@@ -27,7 +27,7 @@
       --gold-light: #F4E7C1;
       --dark-bg: #121212;
       --dark-card: #1E1E1E;
-      --glass-bg: rgba(30, 30, 30, 0.95); /* Aumentei a opacidade para evitar transparência excessiva em mobile */
+      --glass-bg: rgba(30, 30, 30, 0.95);
       --glass-border: rgba(212, 175, 55, 0.15);
     }
     
@@ -38,19 +38,18 @@
       color: #E0E0E0;
       margin: 0;
       padding: 0;
+      overflow-x: hidden; /* Previne scroll horizontal em mobile */
     }
     
     .heading-font {
       font-family: 'Playfair Display', serif;
     }
     
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #1a1a1a; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
 
-    /* Glassmorphism */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(12px);
@@ -72,43 +71,50 @@
     .text-gold { color: var(--gold-primary); }
     .border-gold { border-color: var(--gold-primary); }
     
-    /* Animations */
     .fade-in { animation: fadeIn 0.4s ease-out forwards; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Mobile Sidebar Transition */
     .sidebar-transition {
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Debug Error Overlay */
+    #error-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9999;
+      color: #ff4444;
+      padding: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow: auto;
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
+  <div id="error-overlay"></div>
 
-  <!-- Firebase Setup Modules -->
+  <!-- FIREBASE SETUP (ES MODULES) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // Usando versão 10.13.1 que é muito estável em CDNs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-    // Expose Firebase functions to React
+    // Disponibiliza o Firebase para o React globalmente
     window.firebaseModules = {
       initializeApp, getAuth, signInAnonymously, onAuthStateChanged,
       getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setDoc, orderBy
     };
 
-    // Trigger Custom Event to signal Firebase is ready
-    window.dispatchEvent(new Event('firebase-ready'));
-  </script>
-
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    // --- YOUR FIREBASE CONFIGURATION ---
-    const FIREBASE_CONFIG = {
+    // Configurações do Usuário
+    const firebaseConfig = {
       apiKey: "AIzaSyCgx6yZxS8w54CMTcX_dql7NNDJq5uhEn0",
       authDomain: "barbearia-agendamentos-9ad41.firebaseapp.com",
       projectId: "barbearia-agendamentos-9ad41",
@@ -117,72 +123,72 @@
       appId: "1:612905646934:web:d4715b8eb14bc7d821f4f7"
     };
 
+    try {
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.auth = getAuth(app);
+      
+      // Auto Login
+      signInAnonymously(window.auth).catch(e => console.error("Erro Auth:", e));
+      
+      // Avisa o React que o Firebase está pronto
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebase-ready'));
+      console.log("Firebase Initialized Successfully");
+    } catch (e) {
+      document.getElementById('error-overlay').style.display = 'block';
+      document.getElementById('error-overlay').innerText = "Erro Crítico ao Iniciar Firebase:\n" + e.message;
+      console.error(e);
+    }
+  </script>
+
+  <!-- REACT APP -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
     // --- Hooks & Utilities ---
 
     const useFirebase = () => {
-      const [db, setDb] = useState(null);
-      const [auth, setAuth] = useState(null);
+      const [isReady, setIsReady] = useState(false);
       const [user, setUser] = useState(null);
-      const [appId, setAppId] = useState('barber-pro-prod'); // Fixed App ID for production
+      const [appId] = useState('barber-pro-v3');
 
       useEffect(() => {
-        const init = () => {
-          if (!window.firebaseModules) {
-             // If modules aren't loaded yet, wait a bit
-             setTimeout(init, 50);
-             return;
-          }
-
-          const { initializeApp, getAuth, getFirestore, signInAnonymously, onAuthStateChanged } = window.firebaseModules;
-          
-          try {
-            // Initialize Firebase with your config
-            const app = initializeApp(FIREBASE_CONFIG);
-            const authInstance = getAuth(app);
-            const dbInstance = getFirestore(app);
-
-            setDb(dbInstance);
-            setAuth(authInstance);
-
-            // Auto Sign-in Anonymously
-            signInAnonymously(authInstance).catch((error) => {
-              console.error("Auth Error:", error);
-              alert("Erro de conexão. Verifique o console.");
-            });
-
-            onAuthStateChanged(authInstance, (u) => {
-              if (u) setUser(u);
-            });
-          } catch (e) {
-            console.error("Firebase Init Error:", e);
+        const checkFirebase = () => {
+          if (window.firebaseReady && window.db && window.auth) {
+            setIsReady(true);
+            const { onAuthStateChanged } = window.firebaseModules;
+            onAuthStateChanged(window.auth, (u) => setUser(u));
           }
         };
 
-        // Check if modules are ready, or wait for event
-        if (window.firebaseModules) {
-          init();
+        if (window.firebaseReady) {
+          checkFirebase();
         } else {
-          window.addEventListener('firebase-ready', init);
+          window.addEventListener('firebase-ready', checkFirebase);
+          // Fallback check
+          const interval = setInterval(checkFirebase, 500);
+          return () => {
+            window.removeEventListener('firebase-ready', checkFirebase);
+            clearInterval(interval);
+          };
         }
-        
-        return () => window.removeEventListener('firebase-ready', init);
       }, []);
 
-      return { db, auth, user, appId };
+      return { db: window.db, auth: window.auth, user, appId, isReady };
     };
 
     const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
     // --- Components ---
 
-    const Loading = () => (
+    const Loading = ({ message }) => (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#121212] text-white">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37] mb-4"></div>
-        <p className="text-gray-400 text-sm">Carregando sistema...</p>
+        <p className="text-gray-400 text-sm">{message || "Carregando sistema..."}</p>
       </div>
     );
 
-    // Sidebar Navigation (Responsive)
     const Navigation = ({ activeTab, setActiveTab, onLogout, mobileOpen, setMobileOpen }) => {
       const menuItems = [
         { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
@@ -194,43 +200,25 @@
 
       return (
         <>
-          {/* Mobile Overlay */}
           {mobileOpen && (
-            <div 
-              className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
-              onClick={() => setMobileOpen(false)}
-            ></div>
+            <div className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm" onClick={() => setMobileOpen(false)}></div>
           )}
-
-          {/* Sidebar */}
           <div className={`fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-[#333] transform sidebar-transition md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="p-8 text-center border-b border-[#333] flex justify-between md:block items-center">
               <div>
                 <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">BARBER<span className="text-white">PRO</span></h1>
                 <p className="text-xs text-gray-400 mt-2">Sistema Integrado</p>
               </div>
-              <button onClick={() => setMobileOpen(false)} className="md:hidden text-gray-400">
-                <i className="fa-solid fa-times text-xl"></i>
-              </button>
+              <button onClick={() => setMobileOpen(false)} className="md:hidden text-gray-400"><i className="fa-solid fa-times text-xl"></i></button>
             </div>
-
             <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto h-[calc(100vh-180px)]">
               {menuItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => { setActiveTab(item.id); setMobileOpen(false); }}
-                  className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
-                    activeTab === item.id 
-                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg' 
-                      : 'text-gray-400 hover:bg-[#333] hover:text-white'
-                  }`}
-                >
+                <button key={item.id} onClick={() => { setActiveTab(item.id); setMobileOpen(false); }} className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${activeTab === item.id ? 'bg-[#D4AF37] text-black font-bold shadow-lg' : 'text-gray-400 hover:bg-[#333] hover:text-white'}`}>
                   <i className={`fa-solid ${item.icon} w-6 text-center`}></i>
                   <span className="ml-3">{item.label}</span>
                 </button>
               ))}
             </nav>
-
             <div className="p-4 border-t border-[#333] absolute bottom-0 w-full bg-[#1e1e1e]">
               <button onClick={onLogout} className="w-full flex items-center p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition">
                 <i className="fa-solid fa-right-from-bracket w-6 text-center"></i>
@@ -242,7 +230,6 @@
       );
     };
 
-    // Client Booking View
     const ClientBooking = ({ db, appId, onAdminLogin }) => {
       const [step, setStep] = useState(1);
       const [formData, setFormData] = useState({ name: '', phone: '', service: null, servicePrice: 0, date: '', time: '' });
@@ -252,40 +239,26 @@
       const [availableSlots, setAvailableSlots] = useState([]);
       const [blockedSlots, setBlockedSlots] = useState([]);
 
-      // Fetch Services & Settings
       useEffect(() => {
         if (!db) return;
         const { collection, onSnapshot, doc, getDoc } = window.firebaseModules;
         
-        // Services
         const unsubServices = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'services'), (snap) => {
           setServices(snap.docs.map(d => ({id: d.id, ...d.data()})));
         });
 
-        // Settings (Time slots)
         getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule')).then(snap => {
-          if (snap.exists()) {
-            setAvailableSlots(snap.data().slots || []);
-          } else {
-            // Default slots if not configured
-            setAvailableSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']);
-          }
-        }).catch(err => console.log("Config not found, using defaults"));
+          if (snap.exists()) setAvailableSlots(snap.data().slots || []);
+          else setAvailableSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']);
+        }).catch(() => setAvailableSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']));
 
         return () => unsubServices();
       }, [db, appId]);
 
-      // Check Availability
       useEffect(() => {
         if (!db || !formData.date) return;
         const { collection, query, where, onSnapshot } = window.firebaseModules;
-        
-        const q = query(
-          collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
-          where('date', '==', formData.date),
-          where('status', 'in', ['pendente', 'confirmado'])
-        );
-
+        const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), where('date', '==', formData.date), where('status', 'in', ['pendente', 'confirmado']));
         const unsubscribe = onSnapshot(q, (snapshot) => {
           setBlockedSlots(snapshot.docs.map(d => d.data().time));
         });
@@ -295,31 +268,18 @@
       const handleSubmit = async () => {
         setLoading(true);
         const { collection, addDoc, query, where, getDocs } = window.firebaseModules;
-        
         try {
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), {
-            ...formData,
-            status: 'pendente',
-            createdAt: new Date().toISOString()
-          });
-
-          // Check/Create Client
+          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), { ...formData, status: 'pendente', createdAt: new Date().toISOString() });
+          
           const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
           const q = query(clientsRef, where("phone", "==", formData.phone));
           const querySnapshot = await getDocs(q);
-
           if (querySnapshot.empty) {
-            await addDoc(clientsRef, {
-              name: formData.name,
-              phone: formData.phone,
-              totalVisits: 0,
-              joinedAt: new Date().toISOString()
-            });
+            await addDoc(clientsRef, { name: formData.name, phone: formData.phone, totalVisits: 0, joinedAt: new Date().toISOString() });
           }
           setSuccess(true);
         } catch (error) {
-          console.error("Erro ao agendar:", error);
-          alert("Erro ao agendar. Verifique sua conexão.");
+          alert("Erro ao agendar: " + error.message);
         }
         setLoading(false);
       };
@@ -327,71 +287,42 @@
       if (success) return (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="glass-panel max-w-md w-full p-8 rounded-2xl text-center fade-in">
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i className="fa-solid fa-check text-3xl text-green-500"></i>
-            </div>
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6"><i className="fa-solid fa-check text-3xl text-green-500"></i></div>
             <h2 className="heading-font text-2xl text-white mb-2">Confirmado!</h2>
             <p className="text-gray-400 mb-6">Te aguardamos, {formData.name}.</p>
-            <button onClick={() => { setSuccess(false); setStep(1); setFormData({ name: '', phone: '', service: null, servicePrice: 0, date: '', time: '' }) }} className="btn-primary w-full py-3 rounded-lg font-bold">
-              Novo Agendamento
-            </button>
+            <button onClick={() => { setSuccess(false); setStep(1); setFormData({ name: '', phone: '', service: null, servicePrice: 0, date: '', time: '' }) }} className="btn-primary w-full py-3 rounded-lg font-bold">Novo Agendamento</button>
           </div>
         </div>
       );
 
       return (
         <div className="min-h-screen p-4 flex flex-col items-center justify-center relative">
-          <button onClick={onAdminLogin} className="absolute top-4 right-4 text-xs text-gray-600 hover:text-gold uppercase tracking-widest z-10">
-            Área do Profissional
-          </button>
-
+          <button onClick={onAdminLogin} className="absolute top-4 right-4 text-xs text-gray-600 hover:text-gold uppercase tracking-widest z-10">Área do Profissional</button>
           <div className="glass-panel max-w-lg w-full rounded-2xl p-6 md:p-10 shadow-2xl border-t border-white/10 z-0">
             <div className="text-center mb-8">
               <h1 className="heading-font text-3xl font-bold text-gold mb-1">BARBER<span className="text-white">PRO</span></h1>
               <p className="text-sm text-gray-500">Agende seu horário</p>
             </div>
-
+            {/* Steps */}
             <div className="flex justify-between mb-8 relative">
               <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#333] -z-10"></div>
-              {[1, 2, 3].map(s => (
-                <div key={s} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold-primary text-black' : 'bg-[#333] text-gray-500'}`}>
-                  {s}
-                </div>
-              ))}
+              {[1, 2, 3].map(s => <div key={s} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold-primary text-black' : 'bg-[#333] text-gray-500'}`}>{s}</div>)}
             </div>
-
+            
             {step === 1 && (
               <div className="space-y-4 fade-in">
-                <input 
-                  type="text" value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold"
-                  placeholder="Seu Nome"
-                />
-                <input 
-                  type="tel" value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold"
-                  placeholder="Seu WhatsApp"
-                />
+                <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold" placeholder="Seu Nome" />
+                <input type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold" placeholder="Seu WhatsApp" />
                 <button disabled={!formData.name || !formData.phone} onClick={() => setStep(2)} className="w-full btn-primary py-3 rounded-lg font-bold mt-4 disabled:opacity-50">Próximo</button>
               </div>
             )}
-
+            
             {step === 2 && (
               <div className="fade-in">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-60 overflow-y-auto">
-                  {services.length === 0 ? (
-                    <div className="col-span-2 text-center text-gray-500 py-4">
-                        <i className="fa-solid fa-scissors mb-2 block"></i>
-                        Nenhum serviço cadastrado ainda.
-                        <p className="text-xs mt-1">Acesse o painel para configurar.</p>
-                    </div>
-                  ) :
+                  {services.length === 0 ? <p className="col-span-2 text-center text-gray-500">Sem serviços cadastrados.</p> :
                   services.map((s) => (
-                    <div key={s.id} onClick={() => setFormData({...formData, service: s.name, servicePrice: s.price})}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all ${formData.service === s.name ? 'border-gold bg-yellow-500/10' : 'border-[#333] bg-[#1a1a1a] hover:border-gray-500'}`}
-                    >
+                    <div key={s.id} onClick={() => setFormData({...formData, service: s.name, servicePrice: s.price})} className={`p-4 rounded-xl border cursor-pointer transition-all ${formData.service === s.name ? 'border-gold bg-yellow-500/10' : 'border-[#333] bg-[#1a1a1a] hover:border-gray-500'}`}>
                       <i className={`fa-solid ${s.icon || 'fa-scissors'} text-2xl mb-2 ${formData.service === s.name ? 'text-gold' : 'text-gray-400'}`}></i>
                       <h3 className="font-bold text-sm">{s.name}</h3>
                       <p className="text-xs text-gray-400">{formatCurrency(s.price)}</p>
@@ -404,33 +335,21 @@
                 </div>
               </div>
             )}
-
+            
             {step === 3 && (
               <div className="fade-in">
-                <input type="date" value={formData.date} min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setFormData({...formData, date: e.target.value, time: ''})}
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold mb-6"
-                />
-                
+                <input type="date" value={formData.date} min={new Date().toISOString().split('T')[0]} onChange={(e) => setFormData({...formData, date: e.target.value, time: ''})} className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold mb-6" />
                 {formData.date && (
                   <div className="grid grid-cols-4 gap-2 mb-6">
-                    {availableSlots.length > 0 ? availableSlots.map(time => {
+                    {availableSlots.map(time => {
                       const isTaken = blockedSlots.includes(time);
-                      return (
-                        <button key={time} disabled={isTaken} onClick={() => setFormData({...formData, time})}
-                          className={`py-2 rounded text-sm ${isTaken ? 'bg-[#222] text-[#444] cursor-not-allowed line-through' : formData.time === time ? 'bg-gold-primary text-black font-bold' : 'bg-[#1a1a1a] border border-[#333] hover:border-gold'}`}
-                        >
-                          {time}
-                        </button>
-                      )
-                    }) : <p className="col-span-4 text-center text-gray-500 text-xs">Sem horários configurados.</p>}
+                      return <button key={time} disabled={isTaken} onClick={() => setFormData({...formData, time})} className={`py-2 rounded text-sm ${isTaken ? 'bg-[#222] text-[#444] cursor-not-allowed line-through' : formData.time === time ? 'bg-gold-primary text-black font-bold' : 'bg-[#1a1a1a] border border-[#333] hover:border-gold'}`}>{time}</button>
+                    })}
                   </div>
                 )}
                 <div className="flex gap-3">
                   <button onClick={() => setStep(2)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400">Voltar</button>
-                  <button disabled={!formData.date || !formData.time || loading} onClick={handleSubmit} className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2">
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Confirmar'}
-                  </button>
+                  <button disabled={!formData.date || !formData.time || loading} onClick={handleSubmit} className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2">{loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Confirmar'}</button>
                 </div>
               </div>
             )}
@@ -439,104 +358,43 @@
       );
     };
 
-    // --- Admin Dashboard Components ---
-
     const Dashboard = ({ db, appId }) => {
-      const [stats, setStats] = useState({ 
-        total: 0, 
-        pending: 0, 
-        revenueToday: 0, 
-        revenueProjected: 0,
-        countToday: 0
-      });
+      const [stats, setStats] = useState({ total: 0, pending: 0, revenueToday: 0, revenueProjected: 0, countToday: 0 });
 
       useEffect(() => {
         const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
+        return onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
           let t = 0, p = 0, revToday = 0, revProj = 0, cToday = 0;
           const todayStr = new Date().toISOString().split('T')[0];
-          
           snapshot.forEach(doc => {
             const data = doc.data();
             const price = parseFloat(data.servicePrice || 0);
-            
             t++;
             if (data.status === 'pendente') p++;
-            
-            // Revenue Logic
-            if (data.date === todayStr) {
-                cToday++;
-                if (data.status === 'realizado') {
-                    revToday += price;
-                }
-            }
-
-            // Projected (Confirmed appointments in future or today not yet done)
-            if (data.status === 'confirmado') {
-                revProj += price;
-            }
+            if (data.date === todayStr) { cToday++; if (data.status === 'realizado') revToday += price; }
+            if (data.status === 'confirmado') revProj += price;
           });
           setStats({ total: t, pending: p, revenueToday: revToday, revenueProjected: revProj, countToday: cToday });
         });
-        return () => unsubscribe();
       }, [db, appId]);
 
       return (
         <div className="p-6 md:p-10 fade-in">
           <h2 className="heading-font text-3xl mb-8">Painel de Controle</h2>
-          
-          {/* Revenue Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500 relative overflow-hidden group">
-               <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition">
-                  <i className="fa-solid fa-sack-dollar text-8xl"></i>
-               </div>
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500">
                <p className="text-gray-400 text-sm uppercase tracking-wide">Faturamento Hoje</p>
                <h3 className="text-4xl font-bold mt-2 text-white">{formatCurrency(stats.revenueToday)}</h3>
-               <p className="text-xs text-green-500 mt-2"><i className="fa-solid fa-arrow-up"></i> Recebido</p>
             </div>
-
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500 relative overflow-hidden group">
-               <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition">
-                  <i className="fa-solid fa-chart-line text-8xl"></i>
-               </div>
-               <p className="text-gray-400 text-sm uppercase tracking-wide">Previsão (Confirmados)</p>
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500">
+               <p className="text-gray-400 text-sm uppercase tracking-wide">Previsão</p>
                <h3 className="text-4xl font-bold mt-2 text-white">{formatCurrency(stats.revenueProjected)}</h3>
-               <p className="text-xs text-blue-400 mt-2"><i className="fa-solid fa-calendar-check"></i> A receber</p>
             </div>
           </div>
-
-          {/* Operational Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-panel p-6 rounded-xl border border-[#333]">
-              <div className="flex justify-between items-center">
-                <div>
-                   <p className="text-gray-400 text-xs uppercase">Agenda Hoje</p>
-                   <h3 className="text-2xl font-bold mt-1">{stats.countToday}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-gold"><i className="fa-solid fa-calendar-day"></i></div>
-              </div>
-            </div>
-            
-            <div className="glass-panel p-6 rounded-xl border border-[#333]">
-              <div className="flex justify-between items-center">
-                <div>
-                   <p className="text-gray-400 text-xs uppercase">Pendentes</p>
-                   <h3 className="text-2xl font-bold mt-1 text-yellow-500">{stats.pending}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-yellow-500"><i className="fa-solid fa-clock"></i></div>
-              </div>
-            </div>
-
-            <div className="glass-panel p-6 rounded-xl border border-[#333]">
-              <div className="flex justify-between items-center">
-                <div>
-                   <p className="text-gray-400 text-xs uppercase">Total Histórico</p>
-                   <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-purple-500"><i className="fa-solid fa-users"></i></div>
-              </div>
-            </div>
+            <div className="glass-panel p-6 rounded-xl border border-[#333]"><div><p className="text-gray-400 text-xs uppercase">Agenda Hoje</p><h3 className="text-2xl font-bold mt-1">{stats.countToday}</h3></div></div>
+            <div className="glass-panel p-6 rounded-xl border border-[#333]"><div><p className="text-gray-400 text-xs uppercase">Pendentes</p><h3 className="text-2xl font-bold mt-1 text-yellow-500">{stats.pending}</h3></div></div>
+            <div className="glass-panel p-6 rounded-xl border border-[#333]"><div><p className="text-gray-400 text-xs uppercase">Total Histórico</p><h3 className="text-2xl font-bold mt-1">{stats.total}</h3></div></div>
           </div>
         </div>
       );
@@ -549,35 +407,21 @@
 
       useEffect(() => {
         const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'services'), (snap) => {
-           setServices(snap.docs.map(d => ({id: d.id, ...d.data()})));
-        });
-        return () => unsubscribe();
+        return onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'services'), snap => setServices(snap.docs.map(d => ({id: d.id, ...d.data()}))));
       }, [db, appId]);
 
       const handleSave = async () => {
         if (!newService.name || !newService.price) return;
         const { collection, addDoc, doc, updateDoc } = window.firebaseModules;
-        
         try {
             if (isEditing) {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'services', isEditing), {
-                    name: newService.name,
-                    price: parseFloat(newService.price),
-                    icon: newService.icon
-                });
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'services', isEditing), { name: newService.name, price: parseFloat(newService.price), icon: newService.icon });
                 setIsEditing(false);
             } else {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'services'), {
-                    name: newService.name,
-                    price: parseFloat(newService.price),
-                    icon: newService.icon
-                });
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'services'), { name: newService.name, price: parseFloat(newService.price), icon: newService.icon });
             }
             setNewService({ name: '', price: '', icon: 'fa-scissors' });
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { alert("Erro: " + e.message); }
       };
 
       const handleDelete = async (id) => {
@@ -586,61 +430,26 @@
         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'services', id));
       };
 
-      const startEdit = (s) => {
-          setNewService({ name: s.name, price: s.price, icon: s.icon || 'fa-scissors' });
-          setIsEditing(s.id);
-      }
-
       return (
         <div className="p-6 md:p-10 fade-in max-w-4xl mx-auto">
           <h2 className="heading-font text-3xl mb-6">Meus Serviços</h2>
-
           <div className="glass-panel p-6 rounded-xl mb-8">
             <h3 className="text-lg font-bold mb-4 text-gold">{isEditing ? 'Editar Serviço' : 'Novo Serviço'}</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-               <input 
-                 type="text" placeholder="Nome do Serviço"
-                 value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})}
-                 className="col-span-2 bg-[#121212] border border-[#333] rounded p-2 text-white"
-               />
-               <input 
-                 type="number" placeholder="Preço (R$)"
-                 value={newService.price} onChange={e => setNewService({...newService, price: e.target.value})}
-                 className="bg-[#121212] border border-[#333] rounded p-2 text-white"
-               />
-               <select 
-                 value={newService.icon} onChange={e => setNewService({...newService, icon: e.target.value})}
-                 className="bg-[#121212] border border-[#333] rounded p-2 text-white"
-               >
-                 <option value="fa-scissors">Tesoura</option>
-                 <option value="fa-face-smile">Rosto</option>
-                 <option value="fa-user-tie">Estilo</option>
-                 <option value="fa-spray-can">Spray</option>
-                 <option value="fa-spa">Spa</option>
-               </select>
+               <input type="text" placeholder="Nome" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} className="col-span-2 bg-[#121212] border border-[#333] rounded p-2 text-white" />
+               <input type="number" placeholder="Preço" value={newService.price} onChange={e => setNewService({...newService, price: e.target.value})} className="bg-[#121212] border border-[#333] rounded p-2 text-white" />
+               <select value={newService.icon} onChange={e => setNewService({...newService, icon: e.target.value})} className="bg-[#121212] border border-[#333] rounded p-2 text-white"><option value="fa-scissors">Tesoura</option><option value="fa-face-smile">Rosto</option><option value="fa-user-tie">Estilo</option></select>
             </div>
             <div className="mt-4 flex gap-2 justify-end">
                 {isEditing && <button onClick={() => {setIsEditing(false); setNewService({ name: '', price: '', icon: 'fa-scissors' })}} className="text-gray-500 text-sm px-4">Cancelar</button>}
                 <button onClick={handleSave} className="btn-primary px-6 py-2 rounded font-bold">Salvar</button>
             </div>
           </div>
-
           <div className="grid gap-4">
              {services.map(s => (
                  <div key={s.id} className="glass-panel p-4 rounded-lg flex items-center justify-between group hover:border-gold transition">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-gold">
-                            <i className={`fa-solid ${s.icon}`}></i>
-                        </div>
-                        <div>
-                            <h4 className="font-bold">{s.name}</h4>
-                            <p className="text-gray-400 text-sm">{formatCurrency(s.price)}</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2 opacity-50 group-hover:opacity-100 transition">
-                        <button onClick={() => startEdit(s)} className="p-2 hover:text-blue-400"><i className="fa-solid fa-pen"></i></button>
-                        <button onClick={() => handleDelete(s.id)} className="p-2 hover:text-red-400"><i className="fa-solid fa-trash"></i></button>
-                    </div>
+                    <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-[#222] flex items-center justify-center text-gold"><i className={`fa-solid ${s.icon}`}></i></div><div><h4 className="font-bold">{s.name}</h4><p className="text-gray-400 text-sm">{formatCurrency(s.price)}</p></div></div>
+                    <div className="flex gap-2 opacity-50 group-hover:opacity-100 transition"><button onClick={() => {setNewService({name: s.name, price: s.price, icon: s.icon}); setIsEditing(s.id)}} className="p-2 hover:text-blue-400"><i className="fa-solid fa-pen"></i></button><button onClick={() => handleDelete(s.id)} className="p-2 hover:text-red-400"><i className="fa-solid fa-trash"></i></button></div>
                  </div>
              ))}
           </div>
@@ -658,65 +467,22 @@
         getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule')).then(snap => {
             if (snap.exists()) setSlots(snap.data().slots || []);
             else setSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']);
-        }).catch(err => {
-            console.log("Creating default schedule...");
-            setSlots(['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']);
         });
       }, [db, appId]);
 
-      const saveSlots = async (updatedSlots) => {
+      const saveSlots = async (updated) => {
           setSaving(true);
           const { doc, setDoc } = window.firebaseModules;
-          try {
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule'), { slots: updatedSlots });
-            setSlots(updatedSlots);
-          } catch(e) {
-            console.error("Error saving slots", e);
-            alert("Erro ao salvar");
-          }
+          await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'config_schedule'), { slots: updated });
+          setSlots(updated);
           setSaving(false);
       }
-
-      const addSlot = () => {
-          if (!newSlot || slots.includes(newSlot)) return;
-          const updated = [...slots, newSlot].sort();
-          saveSlots(updated);
-          setNewSlot('');
-      }
-
-      const removeSlot = (slot) => {
-          const updated = slots.filter(s => s !== slot);
-          saveSlots(updated);
-      }
-
       return (
           <div className="p-6 md:p-10 fade-in max-w-4xl mx-auto">
              <h2 className="heading-font text-3xl mb-6">Configuração da Agenda</h2>
              <div className="glass-panel p-8 rounded-xl">
-                 <p className="text-gray-400 mb-6">Defina os horários fixos disponíveis para agendamento online.</p>
-                 
-                 <div className="flex gap-4 mb-8">
-                     <input 
-                       type="time" 
-                       value={newSlot} onChange={e => setNewSlot(e.target.value)}
-                       className="bg-[#121212] border border-[#333] rounded p-2 text-white"
-                     />
-                     <button onClick={addSlot} className="btn-primary px-4 rounded font-bold">
-                         <i className="fa-solid fa-plus mr-2"></i> Adicionar Horário
-                     </button>
-                 </div>
-
-                 <div className="flex flex-wrap gap-3">
-                     {slots.map(slot => (
-                         <div key={slot} className="px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg flex items-center gap-3">
-                             <span className="font-bold text-lg text-white">{slot}</span>
-                             <button onClick={() => removeSlot(slot)} className="text-red-500 hover:text-red-400">
-                                 <i className="fa-solid fa-times"></i>
-                             </button>
-                         </div>
-                     ))}
-                 </div>
-                 {saving && <p className="text-right text-gold text-sm mt-4">Salvando...</p>}
+                 <div className="flex gap-4 mb-8"><input type="time" value={newSlot} onChange={e => setNewSlot(e.target.value)} className="bg-[#121212] border border-[#333] rounded p-2 text-white" /><button onClick={() => {if(newSlot && !slots.includes(newSlot)) saveSlots([...slots, newSlot].sort())}} className="btn-primary px-4 rounded font-bold">Add</button></div>
+                 <div className="flex flex-wrap gap-3">{slots.map(slot => <div key={slot} className="px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg flex items-center gap-3"><span>{slot}</span><button onClick={() => saveSlots(slots.filter(s => s !== slot))} className="text-red-500"><i className="fa-solid fa-times"></i></button></div>)}</div>
              </div>
           </div>
       );
@@ -728,7 +494,7 @@
 
       useEffect(() => {
         const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
+        return onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
           let data = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
           data.sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
           const today = new Date().toISOString().split('T')[0];
@@ -736,7 +502,6 @@
           if (filter === 'pending') data = data.filter(d => d.status === 'pendente');
           setAppointments(data);
         });
-        return () => unsubscribe();
       }, [db, appId, filter]);
 
       const updateStatus = async (id, status) => {
@@ -749,35 +514,20 @@
           <div className="flex justify-between items-center mb-6">
             <h2 className="heading-font text-3xl">Agenda</h2>
             <div className="flex bg-[#1E1E1E] rounded-lg p-1 border border-[#333]">
-              {['today', 'pending', 'all'].map(f => (
-                <button key={f} onClick={() => setFilter(f)} className={`px-4 py-1.5 rounded text-xs uppercase font-bold transition ${filter === f ? 'bg-[#333] text-white' : 'text-gray-500'}`}>{f === 'today' ? 'Hoje' : f === 'pending' ? 'Pendentes' : 'Todos'}</button>
-              ))}
+              {['today', 'pending', 'all'].map(f => <button key={f} onClick={() => setFilter(f)} className={`px-4 py-1.5 rounded text-xs uppercase font-bold transition ${filter === f ? 'bg-[#333] text-white' : 'text-gray-500'}`}>{f}</button>)}
             </div>
           </div>
           <div className="flex-1 overflow-auto space-y-3 pb-20">
-            {appointments.length === 0 ? <p className="text-center text-gray-500 mt-10">Nenhum agendamento encontrado.</p> :
+            {appointments.length === 0 ? <p className="text-center text-gray-500 mt-10">Nada encontrado.</p> :
             appointments.map(app => (
               <div key={app.id} className="glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center justify-between border-l-4 border-[#333] hover:border-gold transition-colors">
-                <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+                <div className="flex items-center gap-4 mb-4 md:mb-0">
                   <div className="w-14 h-14 bg-[#111] rounded-full flex items-center justify-center text-xl font-bold text-gray-300">{app.time.split(':')[0]}</div>
-                  <div>
-                    <h4 className="font-bold text-lg">{app.name}</h4>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span>{app.service} ({formatCurrency(app.servicePrice || 0)})</span>
-                      <span>{app.date.split('-').reverse().join('/')}</span>
-                    </div>
-                  </div>
+                  <div><h4 className="font-bold text-lg">{app.name}</h4><div className="text-sm text-gray-400">{app.service} - {app.date.split('-').reverse().join('/')}</div></div>
                 </div>
                 <div className="flex gap-2">
-                   {app.status === 'pendente' && (
-                      <>
-                        <button onClick={() => updateStatus(app.id, 'confirmado')} className="px-4 py-2 bg-green-500/20 text-green-500 rounded"><i className="fa-solid fa-check"></i></button>
-                        <button onClick={() => updateStatus(app.id, 'cancelado')} className="px-4 py-2 bg-red-500/20 text-red-500 rounded"><i className="fa-solid fa-xmark"></i></button>
-                      </>
-                   )}
-                   {app.status === 'confirmado' && (
-                      <button onClick={() => updateStatus(app.id, 'realizado')} className="px-6 py-2 btn-primary rounded font-bold shadow-lg">Finalizar</button>
-                   )}
+                   {app.status === 'pendente' && <><button onClick={() => updateStatus(app.id, 'confirmado')} className="px-4 py-2 bg-green-500/20 text-green-500 rounded"><i className="fa-solid fa-check"></i></button><button onClick={() => updateStatus(app.id, 'cancelado')} className="px-4 py-2 bg-red-500/20 text-red-500 rounded"><i className="fa-solid fa-xmark"></i></button></>}
+                   {app.status === 'confirmado' && <button onClick={() => updateStatus(app.id, 'realizado')} className="px-6 py-2 btn-primary rounded font-bold shadow-lg">Finalizar</button>}
                    {app.status === 'realizado' && <span className="text-green-500 font-bold"><i className="fa-solid fa-check-double"></i> Feito</span>}
                    {app.status === 'cancelado' && <span className="text-red-500/50">Cancelado</span>}
                 </div>
@@ -797,25 +547,14 @@
         return (
             <div className="p-6 md:p-10 fade-in">
                 <h2 className="heading-font text-3xl mb-6">Clientes</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {clients.map(c => (
-                        <div key={c.id} className="glass-panel p-5 rounded-xl border border-[#333]">
-                            <h4 className="font-bold text-lg">{c.name}</h4>
-                            <p className="text-gray-400">{c.phone}</p>
-                            <div className="mt-2 text-xs text-gold">Visitas: {c.totalVisits || 0}</div>
-                        </div>
-                    ))}
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{clients.map(c => <div key={c.id} className="glass-panel p-5 rounded-xl border border-[#333]"><h4 className="font-bold text-lg">{c.name}</h4><p className="text-gray-400">{c.phone}</p><div className="mt-2 text-xs text-gold">Visitas: {c.totalVisits || 0}</div></div>)}</div>
             </div>
         )
     };
 
-    // --- Admin Layout ---
-
     const AdminLayout = ({ db, appId, onLogout }) => {
       const [activeTab, setActiveTab] = useState('dashboard');
       const [mobileOpen, setMobileOpen] = useState(false);
-
       const renderContent = () => {
         switch (activeTab) {
           case 'dashboard': return <Dashboard db={db} appId={appId} />;
@@ -826,73 +565,54 @@
           default: return <Dashboard db={db} appId={appId} />;
         }
       };
-
       return (
         <div className="flex min-h-screen bg-[#121212]">
-          <Navigation 
-            activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} 
-            mobileOpen={mobileOpen} setMobileOpen={setMobileOpen}
-          />
-          
+          <Navigation activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
           <div className="flex-1 md:ml-64 relative flex flex-col h-screen">
-            {/* Mobile Header */}
             <div className="md:hidden p-4 border-b border-[#333] flex justify-between items-center bg-[#1E1E1E] z-30">
-              <button onClick={() => setMobileOpen(true)} className="text-gold text-xl">
-                 <i className="fa-solid fa-bars"></i>
-              </button>
-              <h1 className="heading-font text-xl text-white font-bold">BARBERPRO</h1>
-              <div className="w-8"></div>
+              <button onClick={() => setMobileOpen(true)} className="text-gold text-xl"><i className="fa-solid fa-bars"></i></button>
+              <h1 className="heading-font text-xl text-white font-bold">BARBERPRO</h1><div className="w-8"></div>
             </div>
-            
-            {/* Content Area */}
-            <main className="flex-1 overflow-auto relative">
-              {renderContent()}
-            </main>
+            <main className="flex-1 overflow-auto relative">{renderContent()}</main>
           </div>
         </div>
       );
     };
 
-    // --- App Entry ---
-
     const App = () => {
-      const { db, auth, user, appId } = useFirebase();
+      const { db, auth, isReady, appId } = useFirebase();
       const [view, setView] = useState('client'); 
       const [password, setPassword] = useState('');
+      const [hasError, setHasError] = useState(false);
 
-      if (!db || !user) return <Loading />;
+      if (hasError) return <div className="text-white p-10 text-center">Erro crítico na aplicação. Recarregue a página.</div>;
+      if (!isReady || !db) return <Loading message="Conectando ao Firebase..." />;
 
       const handleLogin = (e) => {
         e.preventDefault();
-        if (password === 'admin') setView('admin'); // Simple password for demo
+        if (password === 'admin') setView('admin'); 
         else alert('Senha incorreta');
       };
 
-      if (view === 'login') {
-        return (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="glass-panel p-8 rounded-2xl w-full max-w-sm border-t border-gold/50 shadow-2xl fade-in">
-              <div className="text-center mb-8">
-                <h2 className="heading-font text-2xl text-white">Área Restrita</h2>
-                <p className="text-sm text-gray-500">Acesso Profissional</p>
+      try {
+        if (view === 'login') {
+          return (
+            <div className="min-h-screen flex items-center justify-center p-4">
+              <div className="glass-panel p-8 rounded-2xl w-full max-w-sm border-t border-gold/50 shadow-2xl fade-in">
+                <div className="text-center mb-8"><h2 className="heading-font text-2xl text-white">Área Restrita</h2></div>
+                <form onSubmit={handleLogin} className="space-y-4"><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha (admin)" className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold" /><button type="submit" className="w-full btn-primary py-3 rounded-lg font-bold">Entrar</button></form>
+                <button onClick={() => setView('client')} className="w-full mt-4 text-xs text-gray-500 hover:text-white">Voltar</button>
               </div>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha"
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold"
-                />
-                <button type="submit" className="w-full btn-primary py-3 rounded-lg font-bold">Entrar</button>
-              </form>
-              <button onClick={() => setView('client')} className="w-full mt-4 text-xs text-gray-500 hover:text-white">Voltar</button>
             </div>
-          </div>
-        );
+          );
+        }
+        if (view === 'admin') return <AdminLayout db={db} appId={appId} onLogout={() => { setView('client'); setPassword(''); }} />;
+        return <ClientBooking db={db} appId={appId} onAdminLogin={() => setView('login')} />;
+      } catch (err) {
+        console.error("Render Error:", err);
+        setHasError(true);
+        return null;
       }
-
-      if (view === 'admin') {
-        return <AdminLayout db={db} appId={appId} onLogout={() => { setView('client'); setPassword(''); }} />;
-      }
-
-      return <ClientBooking db={db} appId={appId} onAdminLogin={() => setView('login')} />;
     };
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
