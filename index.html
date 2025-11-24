@@ -1,1198 +1,983 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Atendimento</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        :root {
-            --dark-gray: #1a1a1a;
-            --medium-gray: #2d2d2d;
-            --light-gray: #404040;
-            --amber: #ff9500;
-            --amber-hover: #ffaa33;
-            --white: #ffffff;
-            --text-light: #e0e0e0;
-        }
-
-        body {
-            background-color: var(--dark-gray);
-            color: var(--text-light);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header Styles */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--amber), #ff6b00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Search Bar */
-        .search-container {
-            margin-bottom: 30px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 16px 20px;
-            background-color: var(--medium-gray);
-            border: 2px solid var(--light-gray);
-            border-radius: 12px;
-            color: var(--white);
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--amber);
-            box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.3);
-        }
-
-        .search-input::placeholder {
-            color: #888;
-        }
-
-        /* Add Client Button */
-        .add-client-btn {
-            background: linear-gradient(45deg, var(--amber), #ff6b00);
-            color: var(--white);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .add-client-btn:hover {
-            background: linear-gradient(45deg, var(--amber-hover), #ff7b1a);
-            transform: translateY(-2px);
-        }
-
-        /* Clients Grid */
-        .clients-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .client-card {
-            background-color: var(--medium-gray);
-            border-radius: 16px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .client-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--amber);
-            box-shadow: 0 8px 25px rgba(255, 149, 0, 0.2);
-        }
-
-        .client-initial {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(45deg, var(--amber), #ff6b00);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--white);
-            margin-bottom: 15px;
-        }
-
-        .client-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .client-phone {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .client-last-visit {
-            color: var(--amber);
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        /* Client Detail View */
-        #client-detail-screen {
-            display: none;
-        }
-
-        .client-detail {
-            background-color: var(--medium-gray);
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 20px;
-        }
-
-        .client-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .client-profile {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .client-initial-large {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(45deg, var(--amber), #ff6b00);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--white);
-        }
-
-        .client-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .client-name-large {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .client-phone-large {
-            color: #aaa;
-            font-size: 16px;
-        }
-
-        .edit-btn {
-            background-color: var(--light-gray);
-            color: var(--text-light);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .edit-btn:hover {
-            background-color: var(--amber);
-            color: var(--white);
-        }
-
-        .new-record-btn {
-            background: linear-gradient(45deg, var(--amber), #ff6b00);
-            color: var(--white);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .new-record-btn:hover {
-            background: linear-gradient(45deg, var(--amber-hover), #ff7b1a);
-            transform: translateY(-2px);
-        }
-
-        .style-passport {
-            margin-top: 20px;
-        }
-
-        .visit-card {
-            background-color: var(--dark-gray);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--amber);
-        }
-
-        .visit-date {
-            color: var(--amber);
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .photos-gallery {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .photo-placeholder {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, #333, #555);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #888;
-            font-size: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            overflow: hidden;
-        }
-
-        .photo-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .photo-placeholder:hover {
-            transform: scale(1.05);
-            border: 2px solid var(--amber);
-        }
-
-        .notes-section {
-            margin-top: 15px;
-        }
-
-        .notes-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--amber);
-            margin-bottom: 8px;
-        }
-
-        .notes-content {
-            color: #ccc;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: var(--medium-gray);
-            border-radius: 16px;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            font-size: 24px;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close-modal:hover {
-            color: var(--amber);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        .form-input, .form-textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background-color: var(--dark-gray);
-            border: 2px solid var(--light-gray);
-            border-radius: 8px;
-            color: var(--white);
-            font-size: 14px;
-        }
-
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--amber);
-        }
-
-        .submit-btn {
-            background: linear-gradient(45deg, var(--amber), #ff6b00);
-            color: var(--white);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .submit-btn:hover {
-            background: linear-gradient(45deg, var(--amber-hover), #ff7b1a);
-        }
-
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed var(--light-gray);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-
-        .upload-area:hover {
-            border-color: var(--amber);
-            background-color: rgba(255, 149, 0, 0.1);
-        }
-
-        .upload-area i {
-            font-size: 48px;
-            color: var(--amber);
-            margin-bottom: 10px;
-        }
-
-        .upload-area p {
-            color: #aaa;
-            margin-bottom: 10px;
-        }
-
-        .upload-area small {
-            color: #666;
-            font-size: 12px;
-        }
-
-        .hidden-input {
-            display: none;
-        }
-
-        .uploaded-photos {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-
-        .uploaded-photo {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .uploaded-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .remove-photo {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: var(--amber);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Back Button */
-        .back-btn {
-            background-color: var(--light-gray);
-            color: var(--text-light);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .back-btn:hover {
-            background-color: var(--amber);
-            color: var(--white);
-        }
-
-        /* Photo Lightbox */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .lightbox-content {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-        }
-
-        .lightbox-img {
-            max-width: 100%;
-            max-height: 80vh;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(255, 149, 0, 0.5);
-        }
-
-        .lightbox-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        .lightbox-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            background: rgba(0, 0, 0, 0.5);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .lightbox-prev {
-            left: 20px;
-        }
-
-        .lightbox-next {
-            right: 20px;
-        }
-
-        .lightbox-counter {
-            position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 16px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-            
-            .clients-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .client-header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-            
-            .photo-placeholder,
-            .uploaded-photo {
-                width: 70px;
-                height: 70px;
-            }
-            
-            .modal-content {
-                padding: 20px;
-                width: 95%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Main Screen: Client List -->
-        <div id="main-screen">
-            <div class="header">
-                <div class="logo">Registro de Atendimento</div>
-                <button class="add-client-btn" onclick="showAddClientModal()">
-                    <i class="fas fa-plus"></i> Novo Cliente
-                </button>
-            </div>
-
-            <div class="search-container">
-                <input type="text" class="search-input" id="search-input" placeholder="Buscar cliente por nome..." oninput="filterClients()">
-            </div>
-
-            <div class="clients-grid" id="clients-grid">
-                <!-- Client cards will be populated by JavaScript -->
-            </div>
-        </div>
-
-        <!-- Client Detail Screen -->
-        <div id="client-detail-screen">
-            <button class="back-btn" onclick="showMainScreen()">
-                <i class="fas fa-arrow-left"></i> Voltar
-            </button>
-            
-            <div class="client-detail">
-                <div class="client-header">
-                    <div class="client-profile">
-                        <div class="client-initial-large" id="client-initial-large">J</div>
-                        <div class="client-info">
-                            <div class="client-name-large" id="client-name-large">João Silva</div>
-                            <div class="client-phone-large" id="client-phone-large">(11) 99999-9999</div>
-                        </div>
-                    </div>
-                    <button class="edit-btn" onclick="showEditClientModal()">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                </div>
-
-                <button class="new-record-btn" onclick="showAddServiceModal()">
-                    <i class="fas fa-plus"></i> Novo Registro
-                </button>
-
-                <div class="style-passport" id="style-passport">
-                    <!-- Visit cards will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Client Modal -->
-    <div class="modal" id="add-client-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Adicionar Novo Cliente</div>
-                <button class="close-modal" onclick="closeModal('add-client-modal')">&times;</button>
-            </div>
-            <form id="add-client-form">
-                <div class="form-group">
-                    <label class="form-label" for="client-name">Nome Completo</label>
-                    <input type="text" class="form-input" id="client-name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="client-phone">Telefone</label>
-                    <input type="tel" class="form-input" id="client-phone" placeholder="(00) 00000-0000">
-                </div>
-                <button type="submit" class="submit-btn">Adicionar Cliente</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Client Modal -->
-    <div class="modal" id="edit-client-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Editar Cliente</div>
-                <button class="close-modal" onclick="closeModal('edit-client-modal')">&times;</button>
-            </div>
-            <form id="edit-client-form">
-                <div class="form-group">
-                    <label class="form-label" for="edit-client-name">Nome Completo</label>
-                    <input type="text" class="form-input" id="edit-client-name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="edit-client-phone">Telefone</label>
-                    <input type="tel" class="form-input" id="edit-client-phone" placeholder="(00) 00000-0000">
-                </div>
-                <button type="submit" class="submit-btn">Salvar Alterações</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Service Modal -->
-    <div class="modal" id="add-service-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Novo Registro de Serviço</div>
-                <button class="close-modal" onclick="closeModal('add-service-modal')">&times;</button>
-            </div>
-            <form id="add-service-form">
-                <div class="form-group">
-                    <label class="form-label" for="service-date">Data do Serviço</label>
-                    <input type="date" class="form-input" id="service-date" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Fotos do Corte</label>
-                    <div class="upload-area" onclick="document.getElementById('photo-upload').click()">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Clique para adicionar fotos</p>
-                        <small>JPG, PNG até 5MB cada</small>
-                        <input type="file" id="photo-upload" class="hidden-input" accept="image/*" multiple onchange="handlePhotoUpload(this)">
-                    </div>
-                    <div class="uploaded-photos" id="uploaded-photos"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="cut-details">Detalhes do Corte</label>
-                    <textarea class="form-textarea" id="cut-details" placeholder="Descreva o corte realizado..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="products-used">Produtos Usados</label>
-                    <textarea class="form-textarea" id="products-used" placeholder="Liste os produtos utilizados..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="personal-notes">Anotações Pessoais</label>
-                    <textarea class="form-textarea" id="personal-notes" placeholder="Anotações sobre conversas ou preferências..."></textarea>
-                </div>
-                <button type="submit" class="submit-btn">Adicionar Registro</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Photo Lightbox -->
-    <div class="lightbox" id="photo-lightbox">
-        <div class="lightbox-content">
-            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-            <img class="lightbox-img" id="lightbox-img" src="" alt="Foto do corte">
-            <button class="lightbox-nav lightbox-prev" onclick="prevPhoto()">&#10094;</button>
-            <button class="lightbox-nav lightbox-next" onclick="nextPhoto()">&#10095;</button>
-            <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
-        </div>
-    </div>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BarberPro | Gestão & Agendamento</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Mock data with more realistic photos
-        let clients = [
-            {
-                id: 1,
-                name: "João Silva",
-                phone: "(11) 99999-9999",
-                lastVisit: "2024-01-15",
-                visits: [
-                    {
-                        date: "2024-01-15",
-                        photos: [
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=João+Jan+15+Foto+1",
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=João+Jan+15+Foto+2"
-                        ],
-                        cutDetails: "Corte undercut com fade alto e barba aparada. Topete texturizado com navalha.",
-                        productsUsed: "Pomada matte da marca X, óleo de barba sandalwood, bálsamo pós-barba",
-                        personalNotes: "Conversamos sobre o novo emprego dele na área de tecnologia. Prefere cortes mais curtos no verão por causa do calor."
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#D4AF37',
+                            500: '#C5A028',
+                            600: '#B08D22',
+                        },
+                        dark: {
+                            bg: '#121212',
+                            surface: '#1E1E1E',
+                            surfaceHighlight: '#2A2A2A',
+                            border: '#333333'
+                        }
                     },
-                    {
-                        date: "2023-12-10",
-                        photos: [
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=João+Dec+10+Foto+1"
-                        ],
-                        cutDetails: "Corte clássico com topete e barba completa. Barba aparada com tesoura para textura natural.",
-                        productsUsed: "Cera forte para fixação, bálsamo pós-barba com mentol",
-                        personalNotes: "Está planejando viajar para o exterior em fevereiro. Quer manter o estilo mais conservador para entrevistas."
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
                     }
-                ]
-            },
-            {
-                id: 2,
-                name: "Maria Oliveira",
-                phone: "(11) 88888-8888",
-                lastVisit: "2024-01-12",
-                visits: [
-                    {
-                        date: "2024-01-12",
-                        photos: [
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=Maria+Jan+12+Foto+1",
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=Maria+Jan+12+Foto+2",
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=Maria+Jan+12+Foto+3"
-                        ],
-                        cutDetails: "Corte long bob com mechas loiras balayage. Camadas suaves para movimento.",
-                        productsUsed: "Shampoo hidratante, máscara de queratina, sérum térmico",
-                        personalNotes: "Filha está fazendo 15 anos em março. Quer um corte especial para a festa. Adora produtos naturais."
-                    }
-                ]
-            },
-            {
-                id: 3,
-                name: "Carlos Santos",
-                phone: "(11) 77777-7777",
-                lastVisit: "2024-01-10",
-                visits: [
-                    {
-                        date: "2024-01-10",
-                        photos: [
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=Carlos+Jan+10+Foto+1"
-                        ],
-                        cutDetails: "Corte buzz cut com barba cheia. Barba aparada com máquina na altura 3.",
-                        productsUsed: "Óleo de barba com eucalipto, bálsamo hidratante",
-                        personalNotes: "Começou academia recentemente. Quer manter estilo mais masculino e prático. Trabalha como engenheiro."
-                    }
-                ]
-            },
-            {
-                id: 4,
-                name: "Ana Pereira",
-                phone: "(11) 66666-6666",
-                lastVisit: "2024-01-08",
-                visits: [
-                    {
-                        date: "2024-01-08",
-                        photos: [
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=Ana+Jan+8+Foto+1",
-                            "https://placehold.co/400x500/2d2d2d/ff9500?text=Ana+Jan+8+Foto+2"
-                        ],
-                        cutDetails: "Corte pixie curto com franja lateral. Degradê suave nas laterais.",
-                        productsUsed: "Mousse volumizador, spray fixador leve",
-                        personalNotes: "Adora viagens e fotografia. Está pensando em mudar para cabelos mais curtos permanentemente."
-                    }
-                ]
-            }
-        ];
-
-        let currentClient = null;
-        let currentPhotoIndex = 0;
-        let currentPhotos = [];
-        let uploadedPhotos = [];
-        let currentVisitIndex = -1;
-
-        // DOM Elements
-        const mainScreen = document.getElementById('main-screen');
-        const clientDetailScreen = document.getElementById('client-detail-screen');
-        const clientsGrid = document.getElementById('clients-grid');
-        const stylePassport = document.getElementById('style-passport');
-        const searchInput = document.getElementById('search-input');
-
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            renderClients();
-            setupFormListeners();
-            setTodayAsDefaultDate();
-        });
-
-        function setupFormListeners() {
-            document.getElementById('add-client-form').addEventListener('submit', handleAddClient);
-            document.getElementById('edit-client-form').addEventListener('submit', handleEditClient);
-            document.getElementById('add-service-form').addEventListener('submit', handleAddService);
-        }
-
-        function setTodayAsDefaultDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('service-date').value = today;
-        }
-
-        // Render clients list
-        function renderClients() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const filteredClients = clients.filter(client => 
-                client.name.toLowerCase().includes(searchTerm)
-            );
-            
-            filteredClients.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
-            
-            clientsGrid.innerHTML = '';
-            
-            if (filteredClients.length === 0) {
-                clientsGrid.innerHTML = '<div class="client-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">Nenhum cliente encontrado</div>';
-                return;
-            }
-
-            filteredClients.forEach(client => {
-                const clientCard = document.createElement('div');
-                clientCard.className = 'client-card';
-                clientCard.onclick = () => showClientDetail(client);
-                
-                const lastVisitDate = new Date(client.lastVisit);
-                const formattedDate = lastVisitDate.toLocaleDateString('pt-BR');
-                
-                clientCard.innerHTML = `
-                    <div class="client-initial">${client.name.charAt(0)}</div>
-                    <div class="client-name">${client.name}</div>
-                    <div class="client-phone">${client.phone}</div>
-                    <div class="client-last-visit">Última visita: ${formattedDate}</div>
-                `;
-                
-                clientsGrid.appendChild(clientCard);
-            });
-        }
-
-        // Filter clients based on search input
-        function filterClients() {
-            renderClients();
-        }
-
-        // Show client detail screen
-        function showClientDetail(client) {
-            currentClient = client;
-            
-            // Update client header
-            document.getElementById('client-initial-large').textContent = client.name.charAt(0);
-            document.getElementById('client-name-large').textContent = client.name;
-            document.getElementById('client-phone-large').textContent = client.phone;
-            
-            // Render visits
-            renderVisits(client.visits);
-            
-            // Switch screens
-            mainScreen.style.display = 'none';
-            clientDetailScreen.style.display = 'block';
-        }
-
-        // Render visits for a client
-        function renderVisits(visits) {
-            stylePassport.innerHTML = '';
-            
-            if (visits.length === 0) {
-                stylePassport.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">Nenhum registro de serviço ainda</div>';
-                return;
-            }
-            
-            visits.forEach((visit, visitIndex) => {
-                const visitDate = new Date(visit.date);
-                const formattedDate = visitDate.toLocaleDateString('pt-BR');
-                
-                const visitCard = document.createElement('div');
-                visitCard.className = 'visit-card';
-                
-                const photosHTML = visit.photos.map((photo, photoIndex) => `
-                    <div class="photo-placeholder" onclick="openLightbox(${visitIndex}, ${photoIndex})">
-                        <img src="${photo}" alt="Foto do corte">
-                    </div>
-                `).join('');
-                
-                visitCard.innerHTML = `
-                    <div class="visit-date">${formattedDate}</div>
-                    <div class="photos-gallery">
-                        ${photosHTML}
-                    </div>
-                    <div class="notes-section">
-                        <div class="notes-title">Detalhes do Corte</div>
-                        <div class="notes-content">${visit.cutDetails || 'Não especificado'}</div>
-                    </div>
-                    <div class="notes-section">
-                        <div class="notes-title">Produtos Usados</div>
-                        <div class="notes-content">${visit.productsUsed || 'Não especificado'}</div>
-                    </div>
-                    <div class="notes-section">
-                        <div class="notes-title">Anotações Pessoais</div>
-                        <div class="notes-content">${visit.personalNotes || 'Nenhuma anotação'}</div>
-                    </div>
-                `;
-                
-                stylePassport.appendChild(visitCard);
-            });
-        }
-
-        // Show main screen
-        function showMainScreen() {
-            clientDetailScreen.style.display = 'none';
-            mainScreen.style.display = 'block';
-            currentClient = null;
-        }
-
-        // Modal functions
-        function showAddClientModal() {
-            document.getElementById('add-client-modal').style.display = 'flex';
-        }
-
-        function showEditClientModal() {
-            if (currentClient) {
-                document.getElementById('edit-client-name').value = currentClient.name;
-                document.getElementById('edit-client-phone').value = currentClient.phone;
-                document.getElementById('edit-client-modal').style.display = 'flex';
-            }
-        }
-
-        function showAddServiceModal() {
-            if (currentClient) {
-                setTodayAsDefaultDate();
-                uploadedPhotos = [];
-                document.getElementById('uploaded-photos').innerHTML = '';
-                document.getElementById('add-service-modal').style.display = 'flex';
-            }
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Photo upload handling
-        function handlePhotoUpload(input) {
-            const files = input.files;
-            const uploadedPhotosContainer = document.getElementById('uploaded-photos');
-            
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        uploadedPhotos.push(e.target.result);
-                        const photoElement = document.createElement('div');
-                        photoElement.className = 'uploaded-photo';
-                        photoElement.innerHTML = `
-                            <img src="${e.target.result}" alt="Foto selecionada">
-                            <button class="remove-photo" onclick="removeUploadedPhoto(${uploadedPhotos.length - 1})">×</button>
-                        `;
-                        uploadedPhotosContainer.appendChild(photoElement);
-                    };
-                    reader.readAsDataURL(file);
                 }
             }
-            // Clear the input so the same file can be selected again
-            input.value = '';
+        }
+    </script>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #121212; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        function removeUploadedPhoto(index) {
-            uploadedPhotos.splice(index, 1);
-            renderUploadedPhotos();
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        function renderUploadedPhotos() {
-            const uploadedPhotosContainer = document.getElementById('uploaded-photos');
-            uploadedPhotosContainer.innerHTML = '';
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFE082 0%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+            color: #121212;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .input-dark {
+            background: #2A2A2A;
+            border: 1px solid #333;
+            color: white;
+            transition: all 0.2s;
+        }
+        .input-dark:focus {
+            border-color: #D4AF37;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Mobile Bottom Nav Active State */
+        .nav-item.active i { color: #D4AF37; }
+        .nav-item.active span { color: #D4AF37; }
+        
+        .loader {
+            border-top-color: #D4AF37;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen font-sans antialiased selection:bg-gold-400 selection:text-black">
+
+    <!-- Global Loader -->
+    <div id="global-loader" class="fixed inset-0 z-50 flex items-center justify-center bg-dark-bg">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 h-12 w-12"></div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-4 right-4 z-[100] transform translate-x-full transition-transform duration-300">
+        <div class="glass-panel px-6 py-4 rounded-lg shadow-2xl border-l-4 border-gold-400 flex items-center gap-3">
+            <i class="fas fa-info-circle text-gold-400"></i>
+            <span id="toast-message" class="font-medium">Notificação</span>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main id="app-container" class="flex-grow w-full max-w-md mx-auto md:max-w-4xl md:border-x md:border-dark-border min-h-screen relative overflow-hidden">
+        
+        <!-- === VIEW: WELCOME / LANDING === -->
+        <section id="view-landing" class="h-full flex flex-col p-6 items-center justify-center animate-fade-in absolute inset-0 bg-[url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center">
+            <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/90 to-dark-bg/40"></div>
             
-            uploadedPhotos.forEach((photo, index) => {
-                const photoElement = document.createElement('div');
-                photoElement.className = 'uploaded-photo';
-                photoElement.innerHTML = `
-                    <img src="${photo}" alt="Foto selecionada">
-                    <button class="remove-photo" onclick="removeUploadedPhoto(${index})">×</button>
-                `;
-                uploadedPhotosContainer.appendChild(photoElement);
-            });
-        }
+            <div class="relative z-10 text-center space-y-6 w-full max-w-sm">
+                <div class="w-20 h-20 mx-auto rounded-full border-2 border-gold-400 flex items-center justify-center mb-4 backdrop-blur-sm">
+                    <i class="fas fa-cut text-3xl text-gold-400"></i>
+                </div>
+                <h1 class="font-display text-5xl font-bold gold-gradient-text tracking-tight">BarberPro</h1>
+                <p class="text-gray-400 text-lg">Estilo e tradição em cada detalhe.</p>
+                
+                <div class="space-y-3 pt-8">
+                    <button onclick="router.navigate('booking')" class="w-full btn-gold font-bold py-4 rounded-xl text-lg transition transform hover:scale-[1.02]">
+                        Agendar Horário
+                    </button>
+                    <button onclick="router.navigate('client-login')" class="w-full bg-dark-surfaceHighlight border border-dark-border text-white font-medium py-4 rounded-xl transition hover:border-gold-400">
+                        Meus Agendamentos
+                    </button>
+                </div>
+                
+                <p onclick="router.navigate('admin-login')" class="mt-8 text-xs text-gray-500 cursor-pointer hover:text-gold-400 transition uppercase tracking-widest">
+                    Acesso Profissional
+                </p>
+            </div>
+        </section>
 
-        // Form handlers
-        function handleAddClient(e) {
-            e.preventDefault();
-            const name = document.getElementById('client-name').value.trim();
-            const phone = document.getElementById('client-phone').value.trim();
-            
-            if (!name) {
-                alert('Por favor, insira o nome do cliente.');
-                return;
+        <!-- === VIEW: BOOKING WIZARD === -->
+        <section id="view-booking" class="hidden h-screen flex flex-col bg-dark-bg animate-slide-up">
+            <!-- Header -->
+            <header class="p-4 border-b border-dark-border flex items-center justify-between sticky top-0 bg-dark-bg/95 backdrop-blur z-20">
+                <button onclick="router.back()" class="p-2 text-gray-400 hover:text-white"><i class="fas fa-arrow-left text-xl"></i></button>
+                <h2 class="font-display text-xl font-bold text-white">Novo Agendamento</h2>
+                <div class="w-8"></div>
+            </header>
+
+            <div class="flex-grow overflow-y-auto p-4 space-y-8 pb-24">
+                <!-- Step 1: Services -->
+                <div>
+                    <h3 class="text-gold-400 text-sm font-bold uppercase tracking-wider mb-3">1. Selecione o Serviço</h3>
+                    <div id="service-list" class="grid grid-cols-1 gap-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Step 2: Date & Time -->
+                <div id="datetime-section" class="opacity-50 pointer-events-none transition-opacity duration-300">
+                    <h3 class="text-gold-400 text-sm font-bold uppercase tracking-wider mb-3">2. Data e Hora</h3>
+                    
+                    <!-- Horizontal Date Scroller -->
+                    <div class="flex overflow-x-auto gap-3 pb-4 scrollbar-hide" id="date-scroller">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <!-- Time Grid -->
+                    <div id="time-grid" class="grid grid-cols-4 gap-2 mt-2">
+                        <div class="col-span-4 text-center text-gray-500 py-4 text-sm">Selecione uma data primeiro</div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Client Info -->
+                <div id="client-info-section" class="opacity-50 pointer-events-none transition-opacity duration-300">
+                    <h3 class="text-gold-400 text-sm font-bold uppercase tracking-wider mb-3">3. Seus Dados</h3>
+                    <div class="glass-panel p-4 rounded-xl space-y-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Nome Completo</label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-3 top-3.5 text-gray-500"></i>
+                                <input type="text" id="booking-name" class="w-full input-dark pl-10 pr-4 py-3 rounded-lg" placeholder="Seu nome">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">WhatsApp</label>
+                            <div class="relative">
+                                <i class="fab fa-whatsapp absolute left-3 top-3.5 text-gray-500"></i>
+                                <input type="tel" id="booking-phone" class="w-full input-dark pl-10 pr-4 py-3 rounded-lg" placeholder="(00) 00000-0000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="p-4 border-t border-dark-border bg-dark-bg absolute bottom-0 w-full z-30">
+                <button id="confirm-booking-btn" onclick="booking.submit()" disabled class="w-full btn-gold font-bold py-4 rounded-xl opacity-50 cursor-not-allowed transition-all shadow-lg flex justify-center items-center gap-2">
+                    <span>Confirmar Agendamento</span>
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- === VIEW: CLIENT APPOINTMENTS === -->
+        <section id="view-client-login" class="hidden h-screen flex flex-col bg-dark-bg animate-slide-up">
+            <header class="p-4 flex items-center">
+                <button onclick="router.back()" class="p-2"><i class="fas fa-arrow-left"></i></button>
+                <h2 class="ml-4 font-bold text-lg">Meus Agendamentos</h2>
+            </header>
+            <div class="p-6 flex flex-col justify-center h-[80vh]">
+                <div class="glass-panel p-6 rounded-2xl space-y-6">
+                    <div class="text-center">
+                        <i class="fas fa-mobile-alt text-4xl text-gold-400 mb-4"></i>
+                        <p class="text-gray-400 text-sm">Digite seu número para visualizar seu histórico.</p>
+                    </div>
+                    <input type="tel" id="login-phone" class="w-full input-dark py-3 px-4 rounded-lg text-center text-lg tracking-widest" placeholder="(99) 99999-9999">
+                    <button onclick="clientPortal.check()" class="w-full btn-gold py-3 rounded-lg font-bold">Acessar</button>
+                </div>
+                <div id="client-list-results" class="mt-6 space-y-3 overflow-y-auto max-h-[40vh]">
+                    <!-- Results -->
+                </div>
+            </div>
+        </section>
+
+        <!-- === VIEW: ADMIN LOGIN === -->
+        <section id="view-admin-login" class="hidden h-screen flex flex-col bg-dark-bg animate-fade-in items-center justify-center p-6">
+            <div class="w-full max-w-sm glass-panel p-8 rounded-2xl border border-gold-400/30">
+                <h2 class="text-2xl font-display font-bold text-center mb-6">Área Restrita</h2>
+                <div class="space-y-4">
+                    <input type="password" id="admin-pass" class="w-full input-dark p-4 rounded-lg" placeholder="Senha de acesso">
+                    <button onclick="admin.login()" class="w-full btn-gold py-3 rounded-lg font-bold">Entrar</button>
+                </div>
+                <p onclick="router.navigate('landing')" class="text-center mt-6 text-sm text-gray-500 cursor-pointer">Voltar</p>
+            </div>
+        </section>
+
+        <!-- === VIEW: ADMIN DASHBOARD (Authenticated) === -->
+        <section id="view-admin-dashboard" class="hidden h-screen flex flex-col bg-dark-bg animate-fade-in">
+            <!-- Admin Top Bar -->
+            <header class="p-4 border-b border-dark-border flex justify-between items-center bg-dark-surface">
+                <h1 class="font-display font-bold text-xl text-gold-400">Dashboard</h1>
+                <button onclick="admin.logout()" class="text-xs text-gray-400 hover:text-white uppercase"><i class="fas fa-sign-out-alt mr-1"></i> Sair</button>
+            </header>
+
+            <!-- Admin Content Area -->
+            <div id="admin-content-area" class="flex-grow overflow-y-auto pb-24 p-4">
+                
+                <!-- Tab: Overview/Agenda (Default) -->
+                <div id="tab-agenda" class="admin-tab space-y-6">
+                    <!-- Metrics Row -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="glass-panel p-4 rounded-xl border-l-2 border-gold-400">
+                            <p class="text-xs text-gray-400 uppercase">Hoje</p>
+                            <p class="text-2xl font-bold mt-1" id="metric-today-count">0</p>
+                            <p class="text-xs text-green-400 mt-1">Agendados</p>
+                        </div>
+                        <div class="glass-panel p-4 rounded-xl border-l-2 border-green-500">
+                            <p class="text-xs text-gray-400 uppercase">Faturamento</p>
+                            <p class="text-2xl font-bold mt-1 text-green-400" id="metric-revenue">R$ 0</p>
+                            <p class="text-xs text-gray-500 mt-1">Estimado (Hoje)</p>
+                        </div>
+                    </div>
+
+                    <!-- Agenda List -->
+                    <div>
+                        <div class="flex justify-between items-end mb-4">
+                            <h3 class="text-lg font-bold text-white">Agenda do Dia</h3>
+                            <span class="text-xs text-gold-400 bg-gold-400/10 px-2 py-1 rounded" id="current-date-display">Hoje</span>
+                        </div>
+                        <div id="admin-agenda-list" class="space-y-3">
+                            <!-- Items injected via JS -->
+                            <div class="text-center py-10 text-gray-600">Carregando agenda...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Clients (CRM) -->
+                <div id="tab-clients" class="admin-tab hidden space-y-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
+                        <input type="text" id="client-search" onkeyup="crm.filter()" placeholder="Buscar cliente..." class="w-full input-dark pl-12 py-3 rounded-xl">
+                    </div>
+                    
+                    <div id="crm-client-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Client Cards injected JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Admin Bottom Nav -->
+            <nav class="border-t border-dark-border bg-dark-surface/95 backdrop-blur absolute bottom-0 w-full flex justify-around py-3 pb-safe z-40">
+                <button onclick="admin.switchTab('agenda')" class="nav-item active flex flex-col items-center gap-1 w-full text-gray-500 transition">
+                    <i class="fas fa-calendar-alt text-lg"></i>
+                    <span class="text-[10px] font-medium uppercase">Agenda</span>
+                </button>
+                <button onclick="admin.switchTab('clients')" class="nav-item flex flex-col items-center gap-1 w-full text-gray-500 transition">
+                    <i class="fas fa-users text-lg"></i>
+                    <span class="text-[10px] font-medium uppercase">Clientes</span>
+                </button>
+            </nav>
+        </section>
+
+        <!-- === VIEW: CLIENT DETAIL (CRM DEEP DIVE) === -->
+        <section id="view-client-detail" class="hidden h-screen flex flex-col bg-dark-bg absolute inset-0 z-50 animate-slide-up">
+            <div class="bg-dark-surface border-b border-dark-border p-4 flex justify-between items-center sticky top-0 z-10">
+                <button onclick="router.back()" class="p-2 bg-dark-bg rounded-full w-10 h-10 flex items-center justify-center border border-dark-border"><i class="fas fa-arrow-left"></i></button>
+                <div class="text-right">
+                    <h2 class="font-bold text-lg text-white" id="detail-client-name">Nome Cliente</h2>
+                    <p class="text-xs text-gold-400" id="detail-client-phone">Telefone</p>
+                </div>
+            </div>
+
+            <div class="flex-grow overflow-y-auto p-4 space-y-6 pb-20">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-dark-surface p-3 rounded-lg">
+                        <span class="block text-xl font-bold text-white" id="detail-visits">0</span>
+                        <span class="text-[10px] text-gray-400 uppercase">Visitas</span>
+                    </div>
+                    <div class="bg-dark-surface p-3 rounded-lg">
+                        <span class="block text-xl font-bold text-green-400" id="detail-ltv">R$0</span>
+                        <span class="text-[10px] text-gray-400 uppercase">Total Gasto</span>
+                    </div>
+                    <div class="bg-dark-surface p-3 rounded-lg">
+                        <i class="fas fa-camera text-gold-400 text-xl mb-1 block"></i>
+                        <span class="text-[10px] text-gray-400 uppercase">Galeria</span>
+                    </div>
+                </div>
+
+                <!-- Add New Record Button -->
+                <button onclick="crm.openLogModal()" class="w-full py-3 border border-dashed border-gray-600 rounded-xl text-gray-400 hover:border-gold-400 hover:text-gold-400 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i> Adicionar Registro (Passport)
+                </button>
+
+                <!-- Timeline / Passport -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest pl-1">Histórico de Estilo</h3>
+                    <div id="detail-timeline" class="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-0 before:w-0.5 before:bg-gray-800">
+                        <!-- Timeline items injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === MODAL: ADD LOG (Checkout) === -->
+        <div id="modal-log" class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center">
+            <div class="bg-dark-surface w-full max-w-lg sm:rounded-2xl rounded-t-2xl p-6 animate-slide-up max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gold-400">Registrar Atendimento</h3>
+                    <button onclick="ui.closeModal('modal-log')" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                
+                <form id="form-log" onsubmit="crm.saveLog(event)" class="space-y-4">
+                    <input type="hidden" id="log-client-id">
+                    
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-2">Serviço Realizado</label>
+                        <select id="log-service" class="w-full input-dark p-3 rounded-lg">
+                            <option value="Corte de Cabelo">Corte de Cabelo</option>
+                            <option value="Barba">Barba</option>
+                            <option value="Cabelo + Barba">Cabelo + Barba</option>
+                        </select>
+                    </div>
+
+                    <!-- Photo Upload Simulation -->
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-2">Foto do Resultado</label>
+                        <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-gold-400 transition cursor-pointer" onclick="document.getElementById('log-photo-input').click()">
+                            <i class="fas fa-camera text-2xl text-gray-500 mb-2"></i>
+                            <p class="text-sm text-gray-400">Clique para adicionar foto</p>
+                        </div>
+                        <input type="file" id="log-photo-input" accept="image/*" class="hidden" onchange="crm.handlePhotoPreview(this)">
+                        <div id="photo-preview-area" class="mt-2 hidden">
+                            <img id="photo-preview-img" src="" class="h-32 rounded-lg object-cover border border-gold-400">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-2">Notas Técnicas / Produtos</label>
+                        <textarea id="log-notes" rows="3" class="w-full input-dark p-3 rounded-lg" placeholder="Ex: Fade alto, Pomada Matte, Lâmina X..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full btn-gold font-bold py-3 rounded-xl mt-4">Salvar Registro</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- === IMAGE LIGHTBOX === -->
+        <div id="lightbox" onclick="this.classList.add('hidden')" class="hidden fixed inset-0 z-[70] bg-black flex items-center justify-center p-2">
+            <img id="lightbox-img" src="" class="max-w-full max-h-full rounded shadow-2xl border border-gold-400">
+        </div>
+
+    </main>
+
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIG (Placeholder - Environment Handles Key)
+        const firebaseConfig = {
+            apiKey: "", 
+            authDomain: "project-id.firebaseapp.com",
+            projectId: "project-id",
+        };
+
+        // --- INIT ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+        let appId = 'barber-shop-demo-v1'; // Namespace for data isolation
+
+        // --- AUTHENTICATION ---
+        async function initAuth() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Auth Error", error);
             }
-            
-            const newClient = {
-                id: clients.length + 1,
-                name: name,
-                phone: phone,
-                lastVisit: new Date().toISOString().split('T')[0],
-                visits: []
-            };
-            
-            clients.push(newClient);
-            renderClients();
-            closeModal('add-client-modal');
-            document.getElementById('add-client-form').reset();
         }
-
-        function handleEditClient(e) {
-            e.preventDefault();
-            const name = document.getElementById('edit-client-name').value.trim();
-            const phone = document.getElementById('edit-client-phone').value.trim();
-            
-            if (!name) {
-                alert('Por favor, insira o nome do cliente.');
-                return;
-            }
-            
-            if (currentClient) {
-                currentClient.name = name;
-                currentClient.phone = phone;
-                document.getElementById('client-name-large').textContent = name;
-                document.getElementById('client-phone-large').textContent = phone;
-                document.getElementById('client-initial-large').textContent = name.charAt(0);
-                renderClients(); // Update the main list
-            }
-            
-            closeModal('edit-client-modal');
-        }
-
-        function handleAddService(e) {
-            e.preventDefault();
-            const date = document.getElementById('service-date').value;
-            const cutDetails = document.getElementById('cut-details').value.trim();
-            const productsUsed = document.getElementById('products-used').value.trim();
-            const personalNotes = document.getElementById('personal-notes').value.trim();
-            
-            if (!date) {
-                alert('Por favor, selecione a data do serviço.');
-                return;
-            }
-            
-            // Use uploaded photos if available, otherwise use placeholder
-            const photosToUse = uploadedPhotos.length > 0 ? [...uploadedPhotos] : [
-                `https://placehold.co/400x500/2d2d2d/ff9500?text=${encodeURIComponent(currentClient.name)}+${date.replace(/-/g, '+')}+Foto+1`,
-                `https://placehold.co/400x500/2d2d2d/ff9500?text=${encodeURIComponent(currentClient.name)}+${date.replace(/-/g, '+')}+Foto+2`
-            ];
-            
-            const newVisit = {
-                date: date,
-                photos: photosToUse,
-                cutDetails: cutDetails,
-                productsUsed: productsUsed,
-                personalNotes: personalNotes
-            };
-            
-            currentClient.visits.unshift(newVisit);
-            currentClient.lastVisit = date;
-            
-            renderVisits(currentClient.visits);
-            closeModal('add-service-modal');
-            document.getElementById('add-service-form').reset();
-            setTodayAsDefaultDate();
-            uploadedPhotos = [];
-        }
-
-        // Photo Lightbox Functions - CORRIGIDO!
-        function openLightbox(visitIndex, photoIndex) {
-            if (currentClient && currentClient.visits[visitIndex]) {
-                currentPhotos = currentClient.visits[visitIndex].photos;
-                currentPhotoIndex = photoIndex;
-                document.getElementById('lightbox-img').src = currentPhotos[currentPhotoIndex];
-                document.getElementById('lightbox-counter').textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
-                document.getElementById('photo-lightbox').style.display = 'flex';
-            }
-        }
-
-        function closeLightbox() {
-            document.getElementById('photo-lightbox').style.display = 'none';
-            currentPhotos = [];
-            currentPhotoIndex = 0;
-        }
-
-        function nextPhoto() {
-            if (currentPhotos.length > 1) {
-                currentPhotoIndex = (currentPhotoIndex + 1) % currentPhotos.length;
-                document.getElementById('lightbox-img').src = currentPhotos[currentPhotoIndex];
-                document.getElementById('lightbox-counter').textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
-            }
-        }
-
-        function prevPhoto() {
-            if (currentPhotos.length > 1) {
-                currentPhotoIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
-                document.getElementById('lightbox-img').src = currentPhotos[currentPhotoIndex];
-                document.getElementById('lightbox-counter').textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
-            }
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            if (event.target.className === 'modal') {
-                event.target.style.display = 'none';
-            }
-            if (event.target.id === 'photo-lightbox') {
-                closeLightbox();
-            }
-        }
-
-        // Close lightbox with ESC key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeLightbox();
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // document.getElementById('global-loader').classList.add('hidden');
+                initListeners();
             }
         });
+
+        initAuth();
+
+        // --- STATE & CONSTANTS ---
+        const SERVICES = [
+            { id: 1, name: 'Corte de Cabelo', price: 50, duration: 45, icon: 'fa-cut' },
+            { id: 2, name: 'Barba Terapia', price: 35, duration: 30, icon: 'fa-pump-soap' },
+            { id: 3, name: 'Combo (Cabelo + Barba)', price: 75, duration: 60, icon: 'fa-user-tie' },
+            { id: 4, name: 'Pezinho / Acabamento', price: 20, duration: 15, icon: 'fa-ruler-combined' }
+        ];
+
+        let state = {
+            booking: { service: null, date: null, time: null },
+            appointments: [],
+            clients: [],
+            logs: [],
+            currentView: 'landing',
+            adminMode: false
+        };
+
+        // --- ROUTER & UI HELPERS ---
+        window.router = {
+            history: [],
+            navigate: (viewId) => {
+                // Hide all main sections
+                document.querySelectorAll('section[id^="view-"]').forEach(el => {
+                    el.classList.add('hidden');
+                    el.classList.remove('animate-fade-in', 'animate-slide-up');
+                });
+                
+                // Show target
+                const target = document.getElementById(`view-${viewId}`);
+                target.classList.remove('hidden');
+                
+                // Animation logic based on context
+                if (viewId === 'booking' || viewId === 'client-detail') {
+                    target.classList.add('animate-slide-up');
+                } else {
+                    target.classList.add('animate-fade-in');
+                }
+
+                window.router.history.push(viewId);
+                state.currentView = viewId;
+                window.scrollTo(0,0);
+            },
+            back: () => {
+                const current = window.router.history.pop();
+                const prev = window.router.history[window.router.history.length - 1] || 'landing';
+                window.router.navigate(prev);
+                window.router.history.pop(); // Remove the duplicate push from navigate
+            }
+        };
+
+        window.ui = {
+            toast: (msg) => {
+                const el = document.getElementById('toast');
+                document.getElementById('toast-message').textContent = msg;
+                el.classList.remove('translate-x-full');
+                setTimeout(() => el.classList.add('translate-x-full'), 3000);
+            },
+            formatDate: (dateStr) => {
+                if(!dateStr) return '';
+                const date = new Date(dateStr + 'T12:00:00'); // Prevent Timezone shift
+                return date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+            },
+            formatMoney: (val) => `R$ ${val.toFixed(2)}`,
+            closeModal: (id) => document.getElementById(id).classList.add('hidden'),
+            openModal: (id) => document.getElementById(id).classList.remove('hidden'),
+            lightbox: (src) => {
+                document.getElementById('lightbox-img').src = src;
+                document.getElementById('lightbox').classList.remove('hidden');
+            }
+        };
+
+        // --- BOOKING LOGIC ---
+        window.booking = {
+            init: () => {
+                // Render Services
+                const list = document.getElementById('service-list');
+                list.innerHTML = SERVICES.map(s => `
+                    <div onclick="booking.selectService(${s.id}, this)" class="service-card cursor-pointer glass-panel p-4 rounded-xl flex items-center justify-between border border-transparent hover:border-gold-400 transition group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-dark-surfaceHighlight flex items-center justify-center group-hover:bg-gold-400 group-hover:text-black transition">
+                                <i class="fas ${s.icon} text-gold-400 group-hover:text-black"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white">${s.name}</h4>
+                                <p class="text-xs text-gray-400">${s.duration} min</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-gold-400">R$ ${s.price}</span>
+                    </div>
+                `).join('');
+
+                // Render Dates (Next 7 days)
+                const dateScroller = document.getElementById('date-scroller');
+                dateScroller.innerHTML = '';
+                const today = new Date();
+                
+                for(let i=0; i<7; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() + i);
+                    const iso = d.toISOString().split('T')[0];
+                    const dayName = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+                    const dayNum = d.getDate();
+
+                    const btn = document.createElement('button');
+                    btn.className = 'date-btn flex-shrink-0 w-16 h-20 rounded-xl bg-dark-surfaceHighlight flex flex-col items-center justify-center border border-transparent transition focus:outline-none';
+                    btn.onclick = () => booking.selectDate(iso, btn);
+                    btn.innerHTML = `
+                        <span class="text-xs uppercase text-gray-500 font-bold mb-1">${dayName}</span>
+                        <span class="text-xl font-bold text-white">${dayNum}</span>
+                    `;
+                    dateScroller.appendChild(btn);
+                }
+            },
+            selectService: (id, el) => {
+                document.querySelectorAll('.service-card').forEach(c => {
+                    c.classList.remove('border-gold-400', 'bg-dark-surfaceHighlight');
+                    c.classList.add('border-transparent');
+                });
+                el.classList.remove('border-transparent');
+                el.classList.add('border-gold-400', 'bg-dark-surfaceHighlight');
+                
+                state.booking.service = SERVICES.find(s => s.id === id);
+                
+                // Unlock next step
+                const next = document.getElementById('datetime-section');
+                next.classList.remove('opacity-50', 'pointer-events-none');
+                
+                // Re-render times in case duration affects availability (simple version just renders slots)
+                if(state.booking.date) booking.renderTimes();
+            },
+            selectDate: (iso, el) => {
+                document.querySelectorAll('.date-btn').forEach(b => {
+                    b.classList.remove('bg-gold-400', 'text-black');
+                    b.classList.add('bg-dark-surfaceHighlight', 'text-white');
+                    b.querySelector('span:first-child').classList.remove('text-black');
+                    b.querySelector('span:first-child').classList.add('text-gray-500');
+                });
+                el.classList.remove('bg-dark-surfaceHighlight', 'text-white');
+                el.classList.add('bg-gold-400', 'text-black');
+                el.querySelector('span:first-child').classList.remove('text-gray-500');
+                el.querySelector('span:first-child').classList.add('text-black');
+
+                state.booking.date = iso;
+                booking.renderTimes();
+            },
+            renderTimes: () => {
+                const grid = document.getElementById('time-grid');
+                grid.innerHTML = '';
+                
+                const times = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+                
+                // Check existing appointments for this date
+                const busySlots = state.appointments
+                    .filter(a => a.date === state.booking.date && a.status !== 'cancelled')
+                    .map(a => a.time);
+
+                times.forEach(t => {
+                    const isBusy = busySlots.includes(t);
+                    const btn = document.createElement('button');
+                    btn.disabled = isBusy;
+                    btn.className = `py-2 rounded-lg text-sm font-medium border ${isBusy ? 'border-red-900/30 text-gray-600 bg-dark-surface cursor-not-allowed line-through' : 'border-gray-700 text-white hover:border-gold-400 hover:text-gold-400 time-slot-btn'}`;
+                    btn.textContent = t;
+                    if(!isBusy) {
+                        btn.onclick = () => {
+                            document.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('bg-gold-400', 'text-black', 'border-gold-400'));
+                            btn.classList.add('bg-gold-400', 'text-black', 'border-gold-400');
+                            btn.classList.remove('text-white', 'hover:text-gold-400');
+                            
+                            state.booking.time = t;
+                            document.getElementById('client-info-section').classList.remove('opacity-50', 'pointer-events-none');
+                            booking.validateForm();
+                        };
+                    }
+                    grid.appendChild(btn);
+                });
+            },
+            validateForm: () => {
+                const name = document.getElementById('booking-name').value;
+                const phone = document.getElementById('booking-phone').value;
+                const btn = document.getElementById('confirm-booking-btn');
+                
+                if(state.booking.service && state.booking.date && state.booking.time && name.length > 2 && phone.length > 8) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            },
+            submit: async () => {
+                if(!currentUser) return;
+                
+                const btn = document.getElementById('confirm-booking-btn');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                const name = document.getElementById('booking-name').value;
+                const phone = document.getElementById('booking-phone').value;
+
+                // 1. Create/Update Client Logic
+                await crm.ensureClientExists(name, phone);
+
+                // 2. Create Appointment
+                const appointment = {
+                    clientName: name,
+                    clientPhone: phone,
+                    service: state.booking.service.name,
+                    price: state.booking.service.price,
+                    date: state.booking.date,
+                    time: state.booking.time,
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), appointment);
+                    ui.toast('Agendamento confirmado!');
+                    
+                    // Reset and go home
+                    setTimeout(() => {
+                        window.location.reload(); // Simple reset
+                    }, 2000);
+                } catch (e) {
+                    console.error(e);
+                    ui.toast('Erro ao agendar. Tente novamente.');
+                    btn.innerHTML = 'Tentar Novamente';
+                }
+            }
+        };
+
+        // Inputs listeners for validation
+        document.getElementById('booking-name').addEventListener('input', booking.validateForm);
+        document.getElementById('booking-phone').addEventListener('input', booking.validateForm);
+
+        // --- ADMIN / CRM LOGIC ---
+        window.admin = {
+            login: () => {
+                const pass = document.getElementById('admin-pass').value;
+                if(pass === 'admin123') { // Simple gate
+                    state.adminMode = true;
+                    window.router.navigate('admin-dashboard');
+                    admin.loadDashboard();
+                } else {
+                    ui.toast('Senha incorreta');
+                }
+            },
+            logout: () => {
+                state.adminMode = false;
+                window.router.navigate('landing');
+            },
+            switchTab: (tabId) => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+                document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+                
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                // Find button by onclick content is messy, so relying on index or order
+                if(tabId === 'agenda') document.querySelector('.nav-item:nth-child(1)').classList.add('active');
+                if(tabId === 'clients') document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+            },
+            loadDashboard: () => {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('current-date-display').textContent = ui.formatDate(today);
+
+                // Metrics are updated via the Snapshot listener automatically
+                // Just rendering the list here based on state
+                admin.renderAgenda(state.appointments.filter(a => a.date === today));
+            },
+            renderAgenda: (list) => {
+                const container = document.getElementById('admin-agenda-list');
+                if(list.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-gray-600">Nenhum agendamento hoje.</div>';
+                    return;
+                }
+
+                // Sort by time
+                list.sort((a,b) => a.time.localeCompare(b.time));
+
+                container.innerHTML = list.map(app => `
+                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 ${app.status === 'completed' ? 'border-green-500 opacity-70' : app.status === 'cancelled' ? 'border-red-500 opacity-50' : 'border-gold-400'}">
+                        <div>
+                            <p class="font-bold text-lg text-white">${app.time} <span class="text-sm font-normal text-gray-400 ml-2">${app.clientName}</span></p>
+                            <p class="text-xs text-gold-400">${app.service}</p>
+                        </div>
+                        
+                        ${app.status === 'pending' ? `
+                            <div class="flex gap-2">
+                                <button onclick="crm.completeAppointment('${app.docId}', '${app.clientName}', '${app.clientPhone}', '${app.service}')" class="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center hover:bg-green-500 hover:text-white transition"><i class="fas fa-check"></i></button>
+                                <button onclick="crm.updateStatus('${app.docId}', 'cancelled')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="fas fa-times"></i></button>
+                            </div>
+                        ` : `
+                            <span class="text-xs font-bold uppercase ${app.status === 'completed' ? 'text-green-500' : 'text-red-500'}">${app.status === 'completed' ? 'Finalizado' : 'Cancelado'}</span>
+                        `}
+                    </div>
+                `).join('');
+            }
+        };
+
+        window.crm = {
+            ensureClientExists: async (name, phone) => {
+                // Check if client exists
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), where('phone', '==', phone));
+                const snap = await getDocs(q);
+
+                if(snap.empty) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), {
+                        name, 
+                        phone, 
+                        totalVisits: 0,
+                        totalSpent: 0,
+                        joinedAt: new Date().toISOString()
+                    });
+                }
+            },
+            filter: () => {
+                const term = document.getElementById('client-search').value.toLowerCase();
+                const filtered = state.clients.filter(c => c.name.toLowerCase().includes(term) || c.phone.includes(term));
+                crm.renderClients(filtered);
+            },
+            renderClients: (list) => {
+                const container = document.getElementById('crm-client-list');
+                container.innerHTML = list.map(c => `
+                    <div onclick="crm.openClientDetail('${c.docId}')" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-gold-400 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gold-400 text-black font-bold flex items-center justify-center text-lg">
+                                ${c.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white leading-tight">${c.name}</h4>
+                                <p class="text-xs text-gray-500">${c.phone}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-700 flex justify-between text-xs text-gray-400">
+                            <span>Visitas: <b class="text-white">${c.totalVisits || 0}</b></span>
+                            <span>Última: ${ui.formatDate(c.lastVisit) || '-'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            openClientDetail: async (clientId) => {
+                const client = state.clients.find(c => c.docId === clientId);
+                if(!client) return;
+
+                document.getElementById('detail-client-name').textContent = client.name;
+                document.getElementById('detail-client-phone').textContent = client.phone;
+                document.getElementById('detail-visits').textContent = client.totalVisits || 0;
+                document.getElementById('detail-ltv').textContent = ui.formatMoney(client.totalSpent || 0);
+                
+                // Fetch Logs/Passport
+                const logsQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'client_logs'), where('clientId', '==', clientId));
+                const snap = await getDocs(logsQ);
+                const logs = snap.docs.map(d => d.data());
+                
+                // Sort logs by date desc
+                logs.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                const timeline = document.getElementById('detail-timeline');
+                if(logs.length === 0) {
+                    timeline.innerHTML = '<p class="text-gray-500 text-sm ml-6">Nenhum registro encontrado.</p>';
+                } else {
+                    timeline.innerHTML = logs.map(log => `
+                        <div class="relative ml-8 mb-8 animate-fade-in">
+                            <div class="absolute -left-10 top-0 w-4 h-4 rounded-full border-2 border-gold-400 bg-dark-bg"></div>
+                            <span class="text-xs text-gold-400 font-bold mb-1 block">${ui.formatDate(log.date)}</span>
+                            
+                            <div class="glass-panel p-4 rounded-xl border-l-2 border-gold-400/50">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-white">${log.service}</h4>
+                                </div>
+                                ${log.photo ? `
+                                    <img src="${log.photo}" onclick="ui.lightbox(this.src)" class="w-full h-40 object-cover rounded-lg mb-3 border border-gray-700 cursor-zoom-in">
+                                ` : ''}
+                                <p class="text-sm text-gray-300 italic">"${log.notes}"</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Store current client ID for the modal
+                document.getElementById('log-client-id').value = clientId;
+
+                window.router.navigate('client-detail');
+            },
+            updateStatus: async (docId, status) => {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', docId), { status });
+                ui.toast(`Agendamento ${status === 'completed' ? 'concluído' : 'cancelado'}`);
+            },
+            completeAppointment: async (docId, name, phone, service) => {
+                // 1. Mark as completed
+                await crm.updateStatus(docId, 'completed');
+                
+                // 2. Find Client by phone to prep modal
+                const client = state.clients.find(c => c.phone === phone);
+                if(client) {
+                    // Update client stats
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', client.docId), {
+                        lastVisit: new Date().toISOString().split('T')[0],
+                        totalVisits: (client.totalVisits || 0) + 1,
+                        // Adding price vaguely here for demo, ideally fetching service price
+                        totalSpent: (client.totalSpent || 0) + 50 
+                    });
+
+                    // 3. Prompt for Log
+                    document.getElementById('log-client-id').value = client.docId;
+                    document.getElementById('log-service').value = service; // Pre-select service
+                    ui.openModal('modal-log');
+                }
+            },
+            openLogModal: () => {
+                // Reset form
+                document.getElementById('form-log').reset();
+                document.getElementById('photo-preview-area').classList.add('hidden');
+                ui.openModal('modal-log');
+            },
+            handlePhotoPreview: (input) => {
+                if (input.files && input.files[0]) {
+                    // Check size < 500kb for Firestore demo safety
+                    if(input.files[0].size > 600000) {
+                        alert("A imagem deve ter menos de 500KB");
+                        input.value = "";
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('photo-preview-img').src = e.target.result;
+                        document.getElementById('photo-preview-area').classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            },
+            saveLog: async (e) => {
+                e.preventDefault();
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerText;
+                btn.innerText = "Salvando...";
+                btn.disabled = true;
+
+                const clientId = document.getElementById('log-client-id').value;
+                const service = document.getElementById('log-service').value;
+                const notes = document.getElementById('log-notes').value;
+                const photoSrc = document.getElementById('photo-preview-img').src;
+                // Only save photo if it's base64 (actually loaded), not empty src
+                const photo = photoSrc.includes('base64') ? photoSrc : null;
+
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'client_logs'), {
+                        clientId,
+                        date: new Date().toISOString().split('T')[0],
+                        service,
+                        notes,
+                        photo
+                    });
+                    
+                    ui.closeModal('modal-log');
+                    ui.toast("Registro salvo no passaporte!");
+                    
+                    // Refresh Detail View
+                    crm.openClientDetail(clientId);
+                } catch (error) {
+                    console.error(error);
+                    ui.toast("Erro ao salvar log.");
+                }
+                
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        // --- CLIENT PORTAL LOGIC ---
+        window.clientPortal = {
+            check: async () => {
+                const phone = document.getElementById('login-phone').value;
+                if(!phone) return;
+                
+                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), where('clientPhone', '==', phone));
+                const snap = await getDocs(q);
+                
+                const list = document.getElementById('client-list-results');
+                if(snap.empty) {
+                    list.innerHTML = '<div class="text-center text-gray-500">Nenhum agendamento encontrado para este número.</div>';
+                    return;
+                }
+                
+                const apps = snap.docs.map(d => d.data());
+                apps.sort((a,b) => new Date(b.date) - new Date(a.date));
+                
+                list.innerHTML = apps.map(app => `
+                    <div class="glass-panel p-4 rounded-lg flex justify-between items-center border-l-2 ${app.status === 'completed' ? 'border-green-500' : app.status === 'pending' ? 'border-gold-400' : 'border-red-500'}">
+                        <div>
+                            <p class="font-bold text-white">${app.service}</p>
+                            <p class="text-xs text-gray-400">${ui.formatDate(app.date)} às ${app.time}</p>
+                        </div>
+                        <span class="text-xs uppercase font-bold text-gray-300">${app.status === 'pending' ? 'Confirmado' : app.status}</span>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // --- DATA LISTENERS ---
+        function initListeners() {
+            if(!currentUser) return;
+            document.getElementById('global-loader').classList.add('hidden');
+
+            // Listen for Appointments (Global for Admin Dashboard)
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snap) => {
+                state.appointments = snap.docs.map(d => ({docId: d.id, ...d.data()}));
+                
+                if(state.adminMode) {
+                    admin.loadDashboard();
+                    
+                    // Calc Metrics
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const todayApps = state.appointments.filter(a => a.date === todayStr && a.status !== 'cancelled');
+                    document.getElementById('metric-today-count').textContent = todayApps.length;
+                    
+                    const revenue = todayApps.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+                    document.getElementById('metric-revenue').textContent = ui.formatMoney(revenue);
+                }
+            });
+
+            // Listen for Clients (For CRM)
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), (snap) => {
+                state.clients = snap.docs.map(d => ({docId: d.id, ...d.data()}));
+                if(state.adminMode) crm.filter(); // Refresh list
+            });
+            
+            // Start Booking Logic
+            booking.init();
+        }
+
     </script>
 </body>
 </html>
-
 
