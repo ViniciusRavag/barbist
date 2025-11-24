@@ -115,26 +115,39 @@
     import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, setDoc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Global variables from Canvas environment
+    // Variáveis globais do ambiente Canvas
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-default';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* Fallback config */ };
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+    // Configuração de Fallback CRÍTICA com projectId (CORRIGIDO AQUI)
+    const defaultConfig = {
+      apiKey: "AIzaSyCgx6yZxS8w54CMTcX_dql7NNDJq5uhEn0",
+      authDomain: "default-barber-pro.firebaseapp.com",
+      projectId: "default-barber-pro", 
+      storageBucket: "default-barber-pro.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef1234567890"
+    };
+
+    // Tenta usar a config do ambiente, se falhar ou estiver vazia, usa a config de fallback
+    const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
+        ? JSON.parse(__firebase_config) 
+        : defaultConfig;
     
     // Initialize Firebase
     let db, auth;
     let userId = null;
 
     try {
-      if (Object.keys(firebaseConfig).length === 0) {
-        console.error("Firebase Config not found. Using anonymous sign-in fallback.");
-        // This should not happen in the Canvas environment, but good for local testing structure.
+      if (!firebaseConfig.projectId) {
+         throw new Error("Projeto ID do Firebase não fornecido mesmo com fallback.");
       }
       
       const app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
       
-      setLogLevel('debug'); // Enable Firestore logging
+      setLogLevel('debug'); // Ativa o logging do Firestore
 
       // Authentication Handler
       const authenticate = async () => {
@@ -205,8 +218,8 @@
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
     const toCollectionPath = (collectionName, isPrivate = false) => {
         const { appId, userId } = window.appData;
-        // In this barber app, all core data (appointments, services, clients) must be public/shared
-        // for the client view and admin view to work collaboratively.
+        // Na Barbearia, todos os dados principais (agendamentos, serviços, clientes) são públicos/compartilhados
+        // para que o agendamento de clientes e o painel administrativo funcionem colaborativamente.
         return `artifacts/${appId}/public/data/${collectionName}`;
     };
 
@@ -288,7 +301,7 @@
       const [availableSlots, setAvailableSlots] = useState([]);
       const [blockedSlots, setBlockedSlots] = useState([]);
 
-      const { db, appId, fs } = appData;
+      const { db, fs } = appData;
 
       // 1. Fetch Services & Config
       useEffect(() => {
