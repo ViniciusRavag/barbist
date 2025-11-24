@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BarberPro - Gestão Premium</title>
   
   <!-- Tailwind CSS -->
@@ -19,109 +19,145 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              400: '#F4E7C1',
+              500: '#D4AF37',
+              600: '#B4932A',
+              900: '#4A3B0F'
+            },
+            dark: {
+              bg: '#0F0F10',
+              card: '#18181B',
+              surface: '#27272A'
+            }
+          },
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
+    /* Base Styles */
     :root {
       --gold-primary: #D4AF37;
-      --gold-light: #F4E7C1;
-      --dark-bg: #121212;
-      --dark-card: #1E1E1E;
-      --glass-bg: rgba(30, 30, 30, 0.7);
-      --glass-border: rgba(212, 175, 55, 0.15);
+      --glass-bg: rgba(24, 24, 27, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --neon-glow: 0 0 10px rgba(212, 175, 55, 0.3);
     }
     
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--dark-bg);
-      background-image: radial-gradient(circle at top right, #2a2a2a 0%, #121212 100%);
-      color: #E0E0E0;
-    }
-    
-    .heading-font {
-      font-family: 'Playfair Display', serif;
-    }
-    
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #1a1a1a; 
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #333; 
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--gold-primary); 
+      background-color: #050505;
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(60, 60, 60, 0.15) 0%, transparent 30%);
+      color: #E4E4E7;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Glassmorphism Classes */
+    /* Glassmorphism Refined */
     .glass-panel {
       background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--gold-primary) 0%, #b4932a 100%);
-      color: #121212;
-      transition: all 0.3s ease;
+    .glass-card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .btn-primary:hover {
+    .glass-card-hover:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(212, 175, 55, 0.3);
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+      box-shadow: var(--neon-glow);
     }
 
-    .text-gold { color: var(--gold-primary); }
-    .border-gold { border-color: var(--gold-primary); }
-    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
+
     /* Animations */
-    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    
+    .stagger-1 { animation-delay: 100ms; }
+    .stagger-2 { animation-delay: 200ms; }
+    .stagger-3 { animation-delay: 300ms; }
+
+    /* Utilities */
+    .text-gradient {
+      background: linear-gradient(135deg, #F4E7C1 0%, #D4AF37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hide-scroll::-webkit-scrollbar { display: none; }
+    .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- Firebase Configuration (Placeholder for logic) -->
+  <!-- Firebase Setup -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Setup global firebase instances for React to access
     window.firebaseModules = {
-      initializeApp, getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken,
-      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit
+      initializeApp, getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken, signOut,
+      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit, setDoc
     };
   </script>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
-    // --- Firebase Init Hook ---
+    // --- Helpers ---
+    const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+    const formatDate = (dateStr) => {
+        const d = new Date(dateStr + 'T12:00:00'); // Fix timezone issue
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    }
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Bom dia";
+        if (hour < 18) return "Boa tarde";
+        return "Boa noite";
+    };
+
+    // --- Hooks ---
     const useFirebase = () => {
       const [db, setDb] = useState(null);
       const [auth, setAuth] = useState(null);
       const [user, setUser] = useState(null);
-      const [appId, setAppId] = useState('default-barber-app');
+      const [appId, setAppId] = useState('barber-pro-v2');
 
       useEffect(() => {
         const { initializeApp, getAuth, getFirestore, signInAnonymously, onAuthStateChanged, signInWithCustomToken } = window.firebaseModules;
         
-        // Config Mock
         const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "mock" };
         const app = initializeApp(config);
         const authInstance = getAuth(app);
         const dbInstance = getFirestore(app);
-        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-v1';
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-v2';
 
         setDb(dbInstance);
         setAuth(authInstance);
@@ -142,871 +178,776 @@
       return { db, auth, user, appId };
     };
 
+    const useToast = () => {
+      const [toast, setToast] = useState(null);
+      
+      const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      return { toast, showToast };
+    };
+
     // --- Components ---
 
-    // 1. Loading Spinner
+    const Toast = ({ message, type }) => {
+        if (!message) return null;
+        const colors = type === 'success' ? 'border-green-500 text-green-400' : 'border-red-500 text-red-400';
+        const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+        
+        return (
+            <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] glass-panel px-6 py-3 rounded-full border ${colors} flex items-center gap-3 animate-slide-up shadow-2xl`}>
+                <i className={`fa-solid ${icon}`}></i>
+                <span className="font-medium text-sm text-white">{message}</span>
+            </div>
+        );
+    };
+
     const Loading = () => (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
+      <div className="flex items-center justify-center min-h-screen bg-dark-bg">
+        <div className="relative">
+            <div className="w-16 h-16 border-4 border-white/10 border-t-gold-500 rounded-full animate-spin"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gold-500 text-xs font-bold">PRO</div>
+        </div>
       </div>
     );
 
-    // 2. Navigation Sidebar (Desktop) / Bottom Bar (Mobile)
-    const Navigation = ({ activeTab, setActiveTab, onLogout }) => {
-      const menuItems = [
-        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
-        { id: 'schedule', icon: 'fa-calendar-days', label: 'Agenda' },
-        { id: 'clients', icon: 'fa-users', label: 'Clientes' },
-        { id: 'services', icon: 'fa-scissors', label: 'Serviços' },
-      ];
+    // --- Admin Dashboard Components ---
 
-      return (
-        <>
-          {/* Desktop Sidebar */}
-          <div className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 glass-panel border-r border-[#333] z-20">
-            <div className="p-8 text-center border-b border-[#333]">
-              <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">BARBER<span className="text-white">PRO</span></h1>
-              <p className="text-xs text-gray-400 mt-2">Sistema Integrado</p>
-            </div>
-            <nav className="flex-1 py-6 px-4 space-y-2">
-              {menuItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
-                    activeTab === item.id 
-                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg' 
-                      : 'text-gray-400 hover:bg-[#333] hover:text-white'
-                  }`}
-                >
-                  <i className={`fa-solid ${item.icon} w-6`}></i>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-            <div className="p-4 border-t border-[#333]">
-              <button onClick={onLogout} className="w-full flex items-center p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition">
-                <i className="fa-solid fa-right-from-bracket w-6"></i>
-                <span>Sair</span>
-              </button>
-            </div>
-          </div>
+    const StatCard = ({ label, value, subtext, icon, trend, color = "gold" }) => {
+        const colorClasses = {
+            gold: "text-gold-400 border-gold-500/20 bg-gold-500/5",
+            blue: "text-blue-400 border-blue-500/20 bg-blue-500/5",
+            green: "text-emerald-400 border-emerald-500/20 bg-emerald-500/5",
+            purple: "text-purple-400 border-purple-500/20 bg-purple-500/5"
+        };
 
-          {/* Mobile Bottom Nav */}
-          <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#1E1E1E] border-t border-[#333] flex justify-around p-3 z-50">
-            {menuItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center text-xs ${activeTab === item.id ? 'text-gold' : 'text-gray-500'}`}
-              >
-                <i className={`fa-solid ${item.icon} text-lg mb-1`}></i>
-                {item.label}
-              </button>
-            ))}
-            <button onClick={onLogout} className="flex flex-col items-center text-xs text-red-400">
-              <i className="fa-solid fa-right-from-bracket text-lg mb-1"></i>
-              Sair
-            </button>
-          </div>
-        </>
-      );
+        return (
+            <div className="glass-panel p-5 rounded-2xl relative overflow-hidden group">
+                <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity`}>
+                    <i className={`fa-solid ${icon} text-6xl ${colorClasses[color].split(' ')[0]}`}></i>
+                </div>
+                <div className="relative z-10">
+                    <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">{label}</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">{value}</h3>
+                    {subtext && (
+                        <div className="flex items-center text-xs text-gray-500 gap-1">
+                            {trend === 'up' && <i className="fa-solid fa-arrow-trend-up text-emerald-500"></i>}
+                            {trend === 'down' && <i className="fa-solid fa-arrow-trend-down text-red-500"></i>}
+                            <span>{subtext}</span>
+                        </div>
+                    )}
+                </div>
+                <div className={`absolute bottom-0 left-0 h-1 w-full ${color === 'gold' ? 'bg-gradient-to-r from-gold-600 to-gold-400' : ''} ${color === 'green' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' : ''} ${color === 'blue' ? 'bg-gradient-to-r from-blue-600 to-blue-400' : ''} ${color === 'purple' ? 'bg-gradient-to-r from-purple-600 to-purple-400' : ''}`}></div>
+            </div>
+        );
     };
 
-    // 3. Client Booking View (Public)
-    const ClientBooking = ({ db, appId, onAdminLogin }) => {
-      const [step, setStep] = useState(1);
-      const [formData, setFormData] = useState({ name: '', phone: '', service: null, date: '', time: '' });
-      const [loading, setLoading] = useState(false);
-      const [success, setSuccess] = useState(false);
-      const [appointments, setAppointments] = useState([]);
-
-      const services = [
-        { name: "Corte de Cabelo", price: 45, icon: "fa-scissors" },
-        { name: "Barba", price: 30, icon: "fa-face-smile" },
-        { name: "Cabelo e Barba", price: 70, icon: "fa-user-tie" },
-        { name: "Pigmentação", price: 60, icon: "fa-spray-can" }
-      ];
-
-      const timeSlots = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
-
-      // Fetch existing appointments to block slots
-      useEffect(() => {
-        if (!db || !formData.date) return;
-        const { collection, query, where, onSnapshot } = window.firebaseModules;
-        const q = query(
-          collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
-          where('date', '==', formData.date)
-        );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          setAppointments(snapshot.docs.map(d => d.data().time));
-        });
-        return () => unsubscribe();
-      }, [db, formData.date]);
-
-      const handleSubmit = async () => {
-        setLoading(true);
-        const { collection, addDoc, query, where, getDocs } = window.firebaseModules;
-        
-        try {
-          // 1. Create Appointment
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), {
-            ...formData,
-            status: 'pendente',
-            createdAt: new Date().toISOString()
-          });
-
-          // 2. Check/Create Client Profile (Auto-CRM)
-          const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
-          const q = query(clientsRef, where("phone", "==", formData.phone));
-          const querySnapshot = await getDocs(q);
-
-          if (querySnapshot.empty) {
-            await addDoc(clientsRef, {
-              name: formData.name,
-              phone: formData.phone,
-              totalVisits: 0,
-              joinedAt: new Date().toISOString()
-            });
-          }
-
-          setSuccess(true);
-        } catch (error) {
-          console.error("Error booking:", error);
-          alert("Erro ao agendar. Tente novamente.");
-        }
-        setLoading(false);
-      };
-
-      if (success) return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="glass-panel max-w-md w-full p-8 rounded-2xl text-center fade-in">
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i className="fa-solid fa-check text-3xl text-green-500"></i>
-            </div>
-            <h2 className="heading-font text-2xl text-white mb-2">Agendamento Confirmado!</h2>
-            <p className="text-gray-400 mb-6">Te aguardamos, {formData.name}.</p>
-            <button onClick={() => { setSuccess(false); setStep(1); setFormData({ name: '', phone: '', service: null, date: '', time: '' }) }} className="btn-primary w-full py-3 rounded-lg font-bold">
-              Novo Agendamento
-            </button>
-          </div>
-        </div>
-      );
-
-      return (
-        <div className="min-h-screen p-4 flex flex-col items-center justify-center relative">
-          <button onClick={onAdminLogin} className="absolute top-4 right-4 text-xs text-gray-600 hover:text-gold uppercase tracking-widest">
-            Área do Profissional
-          </button>
-
-          <div className="glass-panel max-w-lg w-full rounded-2xl p-6 md:p-10 shadow-2xl border-t border-white/10">
-            <div className="text-center mb-8">
-              <h1 className="heading-font text-3xl font-bold text-gold mb-1">BARBER<span className="text-white">PRO</span></h1>
-              <p className="text-sm text-gray-500">Agende seu horário com estilo</p>
-            </div>
-
-            {/* Step Indicators */}
-            <div className="flex justify-between mb-8 relative">
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#333] -z-10"></div>
-              {[1, 2, 3].map(s => (
-                <div key={s} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold-primary text-black scale-110' : 'bg-[#333] text-gray-500'}`} style={{backgroundColor: step >= s ? '#D4AF37' : '#333'}}>
-                  {s}
-                </div>
-              ))}
-            </div>
-
-            {/* Step 1: Info */}
-            {step === 1 && (
-              <div className="space-y-4 fade-in">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Nome Completo</label>
-                  <input 
-                    type="text" 
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold-primary focus:outline-none"
-                    placeholder="Seu nome"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Telefone (WhatsApp)</label>
-                  <input 
-                    type="tel" 
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold-primary focus:outline-none"
-                    placeholder="(00) 00000-0000"
-                  />
-                </div>
-                <button 
-                  disabled={!formData.name || !formData.phone}
-                  onClick={() => setStep(2)}
-                  className="w-full btn-primary py-3 rounded-lg font-bold mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Próximo <i className="fa-solid fa-arrow-right ml-2"></i>
-                </button>
-              </div>
-            )}
-
-            {/* Step 2: Service */}
-            {step === 2 && (
-              <div className="fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  {services.map((s) => (
-                    <div 
-                      key={s.name}
-                      onClick={() => setFormData({...formData, service: s.name})}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all ${formData.service === s.name ? 'border-gold bg-yellow-500/10' : 'border-[#333] bg-[#1a1a1a] hover:border-gray-500'}`}
-                    >
-                      <i className={`fa-solid ${s.icon} text-2xl mb-2 ${formData.service === s.name ? 'text-gold' : 'text-gray-400'}`}></i>
-                      <h3 className="font-bold text-sm">{s.name}</h3>
-                      <p className="text-xs text-gray-400">R$ {s.price},00</p>
+    const WeeklyChart = ({ data }) => {
+        const max = Math.max(...data.map(d => d.value), 1);
+        return (
+            <div className="flex items-end justify-between h-32 gap-2 mt-4">
+                {data.map((d, i) => (
+                    <div key={i} className="flex flex-col items-center w-full group cursor-pointer">
+                        <div className="relative w-full flex justify-center">
+                            <div 
+                                className="w-full max-w-[20px] bg-dark-surface rounded-t-sm group-hover:bg-gold-500 transition-all duration-300 relative overflow-hidden"
+                                style={{ height: `${(d.value / max) * 100}px` }}
+                            >
+                                <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-gold-500/20 to-transparent"></div>
+                            </div>
+                            <div className="absolute -top-8 bg-white text-black text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                                {d.value}
+                            </div>
+                        </div>
+                        <span className="text-[10px] text-gray-500 mt-2 uppercase">{d.label}</span>
                     </div>
-                  ))}
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={() => setStep(1)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400 hover:text-white">Voltar</button>
-                  <button 
-                    disabled={!formData.service}
-                    onClick={() => setStep(3)}
-                    className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50"
-                  >
-                    Próximo
-                  </button>
-                </div>
-              </div>
-            )}
+                ))}
+            </div>
+        );
+    };
 
-            {/* Step 3: Date & Time */}
-            {step === 3 && (
-              <div className="fade-in">
-                <div className="mb-4">
-                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Data</label>
-                  <input 
-                    type="date" 
-                    value={formData.date}
-                    min={new Date().toISOString().split('T')[0]}
-                    onChange={(e) => setFormData({...formData, date: e.target.value, time: ''})}
-                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold-primary focus:outline-none"
-                  />
+    const DashboardView = ({ db, appId }) => {
+        const [metrics, setMetrics] = useState({ 
+            todayCount: 0, 
+            pendingCount: 0, 
+            revenue: 0, 
+            clientsTotal: 0,
+            weeklyData: [] 
+        });
+
+        useEffect(() => {
+            const { collection, onSnapshot, query, where } = window.firebaseModules;
+            
+            // Listen to appointments
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'));
+            
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                let today = 0, pending = 0, rev = 0;
+                
+                // Weekly logic mock
+                const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+                const weekCounts = new Array(7).fill(0);
+
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.date === todayStr) today++;
+                    if (data.status === 'pendente') pending++;
+                    if (data.status === 'realizado') rev += (data.price || 45); // Fallback price
+                    
+                    const d = new Date(data.date);
+                    if (!isNaN(d)) weekCounts[d.getDay()]++;
+                });
+
+                // Get Client count separately just once or listen
+                // For simplified single file, sticking to appointment derivation or mock
+                // Let's assume rev is monthly for drama, or total.
+                
+                setMetrics({
+                    todayCount: today,
+                    pendingCount: pending,
+                    revenue: rev,
+                    clientsTotal: 0, // Would need another listener
+                    weeklyData: days.map((label, i) => ({ label, value: weekCounts[i] }))
+                });
+            });
+
+            return () => unsubscribe();
+        }, [db, appId]);
+
+        return (
+            <div className="space-y-6 pb-20 animate-slide-up">
+                <header className="flex justify-between items-end mb-2">
+                    <div>
+                        <h2 className="text-3xl font-serif font-bold text-white">Dashboard</h2>
+                        <p className="text-gray-400 text-sm">Visão geral do negócio</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-xs text-gold-500 font-bold bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/20 animate-pulse">
+                            ● Ao vivo
+                        </span>
+                    </div>
+                </header>
+
+                {/* KPI Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard 
+                        label="Atendimentos Hoje" 
+                        value={metrics.todayCount} 
+                        subtext="Meta diária: 12" 
+                        icon="fa-calendar-day" 
+                        trend={metrics.todayCount >= 12 ? 'up' : 'down'}
+                        color="blue"
+                    />
+                    <StatCard 
+                        label="Faturamento" 
+                        value={formatCurrency(metrics.revenue)} 
+                        subtext="+12% essa semana" 
+                        icon="fa-sack-dollar" 
+                        trend="up"
+                        color="gold"
+                    />
+                    <StatCard 
+                        label="Pendentes" 
+                        value={metrics.pendingCount} 
+                        subtext="Aguardando confirmação" 
+                        icon="fa-clock" 
+                        trend="down"
+                        color="purple"
+                    />
+                    <StatCard 
+                        label="Ticket Médio" 
+                        value={formatCurrency(65)} 
+                        subtext="Baseado em serviços" 
+                        icon="fa-chart-pie" 
+                        color="green"
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Weekly Chart */}
+                    <div className="lg:col-span-2 glass-panel p-6 rounded-2xl">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-white">Fluxo Semanal</h3>
+                            <button className="text-xs text-gold-400 hover:underline">Ver detalhado</button>
+                        </div>
+                        <WeeklyChart data={metrics.weeklyData} />
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-center gap-3">
+                        <h3 className="font-bold text-white mb-2">Ações Rápidas</h3>
+                        <button className="w-full py-3 bg-dark-surface hover:bg-gold-500 hover:text-black border border-white/5 rounded-xl transition-all flex items-center justify-center gap-2 group">
+                            <i className="fa-solid fa-plus-circle text-gold-500 group-hover:text-black"></i> Novo Agendamento
+                        </button>
+                        <button className="w-full py-3 bg-dark-surface hover:bg-white/10 border border-white/5 rounded-xl transition-all flex items-center justify-center gap-2">
+                            <i className="fa-solid fa-user-plus text-gray-400"></i> Cadastrar Cliente
+                        </button>
+                        <button className="w-full py-3 bg-dark-surface hover:bg-white/10 border border-white/5 rounded-xl transition-all flex items-center justify-center gap-2">
+                            <i className="fa-solid fa-bullhorn text-gray-400"></i> Enviar Campanha
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // --- Modern Booking Flow ---
+
+    const ServiceCard = ({ service, selected, onClick }) => (
+        <div 
+            onClick={onClick}
+            className={`relative p-4 rounded-xl cursor-pointer transition-all duration-300 border ${
+                selected 
+                ? 'bg-gold-500 text-black border-gold-400 transform scale-[1.02] shadow-[0_0_20px_rgba(212,175,55,0.3)]' 
+                : 'bg-dark-surface border-white/5 text-gray-300 hover:border-gold-500/50 hover:bg-dark-card'
+            }`}
+        >
+            <div className="flex justify-between items-start">
+                <div>
+                    <h3 className={`font-bold ${selected ? 'text-black' : 'text-white'}`}>{service.name}</h3>
+                    <p className={`text-xs mt-1 ${selected ? 'text-black/70' : 'text-gray-500'}`}>{service.duration} min • {service.detail}</p>
+                </div>
+                <div className={`text-lg font-serif font-bold ${selected ? 'text-black' : 'text-gold-400'}`}>
+                    R$ {service.price}
+                </div>
+            </div>
+            {selected && (
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <i className="fa-solid fa-check text-xs text-gold-600"></i>
+                </div>
+            )}
+        </div>
+    );
+
+    const ClientBookingV2 = ({ db, appId, onAdminRequest, showToast }) => {
+        const [step, setStep] = useState(1); // 1: Service, 2: Date/Time, 3: Info, 4: Finish
+        const [selection, setSelection] = useState({ service: null, date: null, time: null, client: { name: '', phone: '' } });
+        const [loading, setLoading] = useState(false);
+        const [bookedSlots, setBookedSlots] = useState([]);
+
+        // Config Data
+        const services = [
+            { id: 1, name: "Corte Signature", price: 50, duration: 45, detail: "Lavagem + Finalização" },
+            { id: 2, name: "Barba Terapia", price: 35, duration: 30, detail: "Toalha Quente + Hidratação" },
+            { id: 3, name: "Combo Executivo", price: 75, duration: 60, detail: "Corte + Barba Premium" },
+            { id: 4, name: "Pezinho & Sobrancelha", price: 20, duration: 15, detail: "Acabamento Rápido" }
+        ];
+
+        // Generate next 14 days
+        const dates = useMemo(() => {
+            const arr = [];
+            const today = new Date();
+            for(let i=0; i<14; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                arr.push({
+                    full: d.toISOString().split('T')[0],
+                    day: d.getDate(),
+                    weekday: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+                    month: d.toLocaleDateString('pt-BR', { month: 'short' })
+                });
+            }
+            return arr;
+        }, []);
+
+        const hours = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+
+        // Load Slots
+        useEffect(() => {
+            if (!selection.date) return;
+            const { collection, query, where, onSnapshot } = window.firebaseModules;
+            const q = query(
+                collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
+                where('date', '==', selection.date)
+            );
+            return onSnapshot(q, snap => {
+                setBookedSlots(snap.docs.map(d => d.data().time));
+            });
+        }, [selection.date, db, appId]);
+
+        const handleSubmit = async () => {
+            setLoading(true);
+            try {
+                const { collection, addDoc, query, where, getDocs } = window.firebaseModules;
+                
+                // Create Appointment
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), {
+                    ...selection.client,
+                    service: selection.service.name,
+                    price: selection.service.price,
+                    date: selection.date,
+                    time: selection.time,
+                    status: 'pendente',
+                    createdAt: new Date().toISOString()
+                });
+
+                // Upsert Client
+                const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
+                const q = query(clientsRef, where("phone", "==", selection.client.phone));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    await addDoc(clientsRef, {
+                        name: selection.client.name,
+                        phone: selection.client.phone,
+                        joinedAt: new Date().toISOString(),
+                        totalVisits: 0,
+                        tags: ['Novo']
+                    });
+                }
+
+                showToast("Agendamento realizado com sucesso!");
+                setStep(4);
+            } catch (err) {
+                console.error(err);
+                showToast("Erro ao agendar.", 'error');
+            }
+            setLoading(false);
+        };
+
+        if (step === 4) return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center animate-slide-up">
+                <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                    <i className="fa-solid fa-check text-4xl text-emerald-500"></i>
+                </div>
+                <h2 className="font-serif text-3xl font-bold text-white mb-2">Confirmado!</h2>
+                <p className="text-gray-400 mb-8 max-w-xs">Seu horário para <strong>{selection.service.name}</strong> está reservado.</p>
+                
+                <div className="glass-panel p-6 rounded-xl w-full max-w-xs mb-8 text-left border-l-4 border-gold-500">
+                    <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-500">Data</span>
+                        <span className="text-white font-bold">{formatDate(selection.date)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Horário</span>
+                        <span className="text-white font-bold">{selection.time}</span>
+                    </div>
+                </div>
+
+                <button 
+                    onClick={() => { setStep(1); setSelection({ service: null, date: null, time: null, client: { name: '', phone: '' } }); }}
+                    className="w-full max-w-xs py-4 bg-dark-surface border border-white/10 rounded-xl hover:bg-gold-500 hover:text-black hover:border-gold-500 transition-all font-bold"
+                >
+                    Novo Agendamento
+                </button>
+            </div>
+        );
+
+        return (
+            <div className="min-h-screen relative flex flex-col max-w-md mx-auto shadow-2xl bg-black md:border-x md:border-white/5">
+                {/* Header */}
+                <div className="p-6 flex justify-between items-center bg-gradient-to-b from-dark-surface/50 to-transparent sticky top-0 z-20 backdrop-blur-md">
+                    <div>
+                        <p className="text-gold-500 text-xs font-bold uppercase tracking-widest mb-1">Barbearia Premium</p>
+                        <h1 className="font-serif text-2xl font-bold text-white">BarberPro</h1>
+                    </div>
+                    <button onClick={onAdminRequest} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold-500 hover:text-black transition">
+                        <i className="fa-solid fa-lock text-xs"></i>
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 p-6 overflow-y-auto pb-32">
+                    {/* Progress */}
+                    <div className="flex gap-2 mb-8">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${step >= i ? 'bg-gold-500' : 'bg-white/10'}`}></div>
+                        ))}
+                    </div>
+
+                    {step === 1 && (
+                        <div className="space-y-4 animate-slide-up">
+                            <h2 className="text-xl font-bold text-white mb-4">Escolha o serviço</h2>
+                            {services.map(s => (
+                                <ServiceCard 
+                                    key={s.id} 
+                                    service={s} 
+                                    selected={selection.service?.id === s.id} 
+                                    onClick={() => setSelection({...selection, service: s})}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="animate-slide-up">
+                            <h2 className="text-xl font-bold text-white mb-4">Escolha a data</h2>
+                            
+                            {/* Horizontal Date Picker */}
+                            <div className="flex gap-3 overflow-x-auto pb-4 hide-scroll -mx-6 px-6 mb-6">
+                                {dates.map(d => {
+                                    const isSelected = selection.date === d.full;
+                                    return (
+                                        <button 
+                                            key={d.full}
+                                            onClick={() => setSelection({...selection, date: d.full, time: null})}
+                                            className={`flex-shrink-0 w-16 h-20 rounded-xl flex flex-col items-center justify-center border transition-all ${
+                                                isSelected 
+                                                ? 'bg-gold-500 text-black border-gold-500 scale-105 shadow-lg' 
+                                                : 'bg-dark-surface border-white/5 text-gray-400 hover:border-white/20'
+                                            }`}
+                                        >
+                                            <span className="text-xs uppercase font-bold">{d.weekday}</span>
+                                            <span className="text-xl font-bold my-1">{d.day}</span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+
+                            {selection.date && (
+                                <div className="animate-slide-up">
+                                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Horários</h3>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {hours.map(h => {
+                                            const isTaken = bookedSlots.includes(h);
+                                            return (
+                                                <button 
+                                                    key={h}
+                                                    disabled={isTaken}
+                                                    onClick={() => setSelection({...selection, time: h})}
+                                                    className={`py-2 rounded-lg text-sm font-bold transition-all ${
+                                                        isTaken 
+                                                        ? 'opacity-20 cursor-not-allowed bg-white/5 decoration-slice line-through' 
+                                                        : selection.time === h
+                                                            ? 'bg-white text-black shadow-lg transform scale-105'
+                                                            : 'bg-dark-surface border border-white/10 hover:border-gold-500/50'
+                                                    }`}
+                                                >
+                                                    {h}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="animate-slide-up space-y-6">
+                            <h2 className="text-xl font-bold text-white">Seus dados</h2>
+                            
+                            <div className="space-y-4">
+                                <div className="group">
+                                    <label className="block text-xs text-gold-500 font-bold uppercase mb-1">Nome Completo</label>
+                                    <input 
+                                        type="text" 
+                                        value={selection.client.name}
+                                        onChange={e => setSelection({...selection, client: {...selection.client, name: e.target.value}})}
+                                        className="w-full bg-dark-surface border-b-2 border-white/10 p-3 text-white focus:border-gold-500 focus:outline-none transition-colors rounded-t-lg"
+                                        placeholder="Digite seu nome"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gold-500 font-bold uppercase mb-1">Celular / WhatsApp</label>
+                                    <input 
+                                        type="tel" 
+                                        value={selection.client.phone}
+                                        onChange={e => setSelection({...selection, client: {...selection.client, phone: e.target.value}})}
+                                        className="w-full bg-dark-surface border-b-2 border-white/10 p-3 text-white focus:border-gold-500 focus:outline-none transition-colors rounded-t-lg"
+                                        placeholder="(00) 00000-0000"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Summary Card */}
+                            <div className="glass-panel p-5 rounded-xl border-l-2 border-gold-500 mt-6">
+                                <h4 className="text-white font-serif font-bold mb-3 border-b border-white/10 pb-2">Resumo</h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between"><span className="text-gray-400">Serviço</span> <span className="text-white">{selection.service.name}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">Data</span> <span className="text-white">{formatDate(selection.date)}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">Horário</span> <span className="text-white">{selection.time}</span></div>
+                                    <div className="flex justify-between pt-2 border-t border-white/10 mt-2">
+                                        <span className="text-gold-500 font-bold">Total</span> 
+                                        <span className="text-gold-500 font-bold text-lg">R$ {selection.service.price},00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom Action Bar */}
+                <div className="fixed bottom-0 w-full max-w-md bg-[#050505]/90 backdrop-blur-lg border-t border-white/10 p-6 z-30">
+                    <div className="flex gap-4">
+                        {step > 1 && (
+                            <button onClick={() => setStep(step - 1)} className="w-12 h-12 flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/5 transition">
+                                <i className="fa-solid fa-arrow-left text-gray-400"></i>
+                            </button>
+                        )}
+                        <button 
+                            onClick={step === 3 ? handleSubmit : () => setStep(step + 1)}
+                            disabled={
+                                (step === 1 && !selection.service) ||
+                                (step === 2 && (!selection.date || !selection.time)) ||
+                                (step === 3 && (!selection.client.name || !selection.client.phone)) || loading
+                            }
+                            className="flex-1 bg-gold-500 text-black font-bold text-sm uppercase tracking-wider rounded-xl py-3 hover:bg-gold-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] flex items-center justify-center gap-2"
+                        >
+                            {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : (step === 3 ? 'Confirmar Agendamento' : 'Continuar')}
+                            {!loading && <i className="fa-solid fa-arrow-right"></i>}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // --- Admin Layout Components ---
+
+    const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
+        const items = [
+            { id: 'dashboard', icon: 'fa-chart-simple', label: 'Dashboard' },
+            { id: 'schedule', icon: 'fa-calendar-days', label: 'Agenda' },
+            { id: 'clients', icon: 'fa-users', label: 'Clientes' },
+            { id: 'financial', icon: 'fa-wallet', label: 'Financeiro' }
+        ];
+
+        return (
+            <aside className="hidden md:flex flex-col w-20 lg:w-64 h-screen fixed left-0 top-0 bg-black border-r border-white/10 z-50">
+                <div className="h-20 flex items-center justify-center lg:justify-start lg:px-8 border-b border-white/5">
+                    <div className="w-10 h-10 bg-gold-500 rounded-lg flex items-center justify-center text-black font-bold text-xl font-serif">B</div>
+                    <span className="hidden lg:block ml-3 font-serif font-bold text-xl text-white tracking-wide">BarberPro</span>
                 </div>
                 
-                {formData.date && (
-                  <div className="mb-6">
-                    <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wider">Horários Disponíveis</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {timeSlots.map(time => {
-                        const isTaken = appointments.includes(time);
-                        return (
-                          <button
-                            key={time}
-                            disabled={isTaken}
-                            onClick={() => setFormData({...formData, time})}
-                            className={`py-2 rounded text-sm ${
-                              isTaken 
-                                ? 'bg-[#222] text-[#444] cursor-not-allowed line-through' 
-                                : formData.time === time
-                                  ? 'bg-gold-primary text-black font-bold'
-                                  : 'bg-[#1a1a1a] border border-[#333] hover:border-gold'
+                <nav className="flex-1 py-8 px-2 lg:px-4 space-y-2">
+                    {items.map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`w-full flex items-center p-3 rounded-xl transition-all group ${
+                                activeTab === item.id 
+                                ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' 
+                                : 'text-gray-500 hover:bg-white/5 hover:text-white'
                             }`}
-                          >
-                            {time}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <button onClick={() => setStep(2)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400 hover:text-white">Voltar</button>
-                  <button 
-                    disabled={!formData.date || !formData.time || loading}
-                    onClick={handleSubmit}
-                    className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Confirmar'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    };
-
-    // 4. Admin Portal Components
-
-    const Dashboard = ({ db, appId }) => {
-      const [stats, setStats] = useState({ total: 0, pending: 0, revenue: 0, today: 0 });
-
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
-          let t = 0, p = 0, r = 0, td = 0;
-          const todayStr = new Date().toISOString().split('T')[0];
-          
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            t++;
-            if (data.status === 'pendente') p++;
-            if (data.status === 'realizado') {
-              // Approximate price map since we didn't store price in appointment directly in this simplified schema
-              // In production, store price at booking time.
-              const prices = { "Corte de Cabelo": 45, "Barba": 30, "Cabelo e Barba": 70, "Pigmentação": 60 };
-              r += (prices[data.service] || 0);
-            }
-            if (data.date === todayStr) td++;
-          });
-          setStats({ total: t, pending: p, revenue: r, today: td });
-        });
-        return () => unsubscribe();
-      }, [db, appId]);
-
-      return (
-        <div className="p-6 md:p-10 fade-in">
-          <h2 className="heading-font text-3xl mb-8">Painel de Controle</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500">
-              <p className="text-gray-400 text-sm uppercase">Agendamentos Hoje</p>
-              <h3 className="text-3xl font-bold mt-2">{stats.today}</h3>
-            </div>
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-yellow-500">
-              <p className="text-gray-400 text-sm uppercase">Pendentes</p>
-              <h3 className="text-3xl font-bold mt-2 text-yellow-500">{stats.pending}</h3>
-            </div>
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500">
-              <p className="text-gray-400 text-sm uppercase">Faturamento (Est.)</p>
-              <h3 className="text-3xl font-bold mt-2 text-green-500">R$ {stats.revenue}</h3>
-            </div>
-            <div className="glass-panel p-6 rounded-xl border-l-4 border-purple-500">
-              <p className="text-gray-400 text-sm uppercase">Total Geral</p>
-              <h3 className="text-3xl font-bold mt-2">{stats.total}</h3>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const Schedule = ({ db, appId, onSelectClient }) => {
-      const [appointments, setAppointments] = useState([]);
-      const [filter, setFilter] = useState('today'); // today, all, pending
-      const [finishingAppt, setFinishingAppt] = useState(null); // The appointment being finished
-
-      useEffect(() => {
-        const { collection, onSnapshot, query, where, orderBy } = window.firebaseModules;
-        let q = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
-        
-        // Sorting in memory for simplicity with index limitations, or create simple index
-        // Defaulting to simple fetch and JS sort to avoid index errors in this environment
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          let data = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-          
-          // JS Sort
-          data.sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
-
-          // Filter Logic
-          const today = new Date().toISOString().split('T')[0];
-          if (filter === 'today') {
-            data = data.filter(d => d.date === today);
-          } else if (filter === 'pending') {
-            data = data.filter(d => d.status === 'pendente');
-          }
-          
-          setAppointments(data);
-        });
-        return () => unsubscribe();
-      }, [db, appId, filter]);
-
-      const updateStatus = async (id, status) => {
-        const { doc, updateDoc } = window.firebaseModules;
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', id), { status });
-      };
-
-      const handleFinish = (appt) => {
-        setFinishingAppt(appt);
-      };
-
-      const closeFinishModal = () => {
-        setFinishingAppt(null);
-      };
-
-      return (
-        <div className="p-6 md:p-10 fade-in h-full flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="heading-font text-3xl">Agenda</h2>
-            <div className="flex bg-[#1E1E1E] rounded-lg p-1 border border-[#333]">
-              {['today', 'pending', 'all'].map(f => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={`px-4 py-1.5 rounded text-xs uppercase font-bold transition ${filter === f ? 'bg-[#333] text-white' : 'text-gray-500'}`}
-                >
-                  {f === 'today' ? 'Hoje' : f === 'pending' ? 'Pendentes' : 'Todos'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-auto space-y-3 pb-20">
-            {appointments.length === 0 ? (
-              <div className="text-center text-gray-500 mt-20">Nenhum agendamento encontrado para este filtro.</div>
-            ) : (
-              appointments.map(app => (
-                <div key={app.id} className="glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center justify-between border-l-4 border-[#333] hover:border-gold transition-colors">
-                  <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
-                    <div className="w-14 h-14 bg-[#111] rounded-full flex items-center justify-center text-xl font-bold text-gray-300">
-                      {app.time.split(':')[0]}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">{app.name}</h4>
-                      <div className="flex items-center gap-3 text-sm text-gray-400">
-                        <span><i className="fa-solid fa-scissors text-gold text-xs mr-1"></i> {app.service}</span>
-                        <span><i className="fa-solid fa-calendar text-gold text-xs mr-1"></i> {app.date.split('-').reverse().join('/')}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 w-full md:w-auto">
-                    {app.status === 'pendente' && (
-                      <>
-                        <button onClick={() => updateStatus(app.id, 'confirmado')} className="flex-1 md:flex-none px-4 py-2 bg-green-500/20 text-green-500 rounded hover:bg-green-500/30">
-                          <i className="fa-solid fa-check mr-1"></i> Confirmar
+                        >
+                            <i className={`fa-solid ${item.icon} text-lg w-6 text-center ${activeTab === item.id ? 'text-black' : 'group-hover:text-gold-400'}`}></i>
+                            <span className="hidden lg:block ml-3 font-medium text-sm">{item.label}</span>
                         </button>
-                        <button onClick={() => updateStatus(app.id, 'cancelado')} className="flex-1 md:flex-none px-4 py-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30">
-                          <i className="fa-solid fa-xmark mr-1"></i>
-                        </button>
-                      </>
-                    )}
-                    {app.status === 'confirmado' && (
-                      <button onClick={() => handleFinish(app)} className="flex-1 md:flex-none px-6 py-2 btn-primary rounded font-bold shadow-lg">
-                        Finalizar Atendimento
-                      </button>
-                    )}
-                    {app.status === 'realizado' && (
-                      <span className="px-4 py-2 text-green-500 font-bold border border-green-500/30 rounded flex items-center">
-                        <i className="fa-solid fa-check-double mr-2"></i> Realizado
-                      </span>
-                    )}
-                    {app.status === 'cancelado' && (
-                      <span className="px-4 py-2 text-red-500/50 italic">Cancelado</span>
-                    )}
-                  </div>
+                    ))}
+                </nav>
+
+                <div className="p-4 border-t border-white/5">
+                    <button onClick={onLogout} className="w-full flex items-center justify-center lg:justify-start p-3 text-red-400 hover:bg-red-500/10 rounded-xl transition">
+                        <i className="fa-solid fa-right-from-bracket text-lg"></i>
+                        <span className="hidden lg:block ml-3 text-sm">Sair</span>
+                    </button>
                 </div>
-              ))
-            )}
-          </div>
-
-          {/* Finish Modal (Integration Point) */}
-          {finishingAppt && (
-            <FinishServiceModal 
-              appt={finishingAppt} 
-              onClose={closeFinishModal} 
-              db={db} 
-              appId={appId} 
-              onStatusUpdate={updateStatus}
-            />
-          )}
-        </div>
-      );
-    };
-
-    // 5. CRM Components
-    
-    const ClientList = ({ db, appId, onViewProfile }) => {
-      const [clients, setClients] = useState([]);
-      const [search, setSearch] = useState('');
-
-      useEffect(() => {
-        const { collection, onSnapshot } = window.firebaseModules;
-        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), (snapshot) => {
-          const list = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-          setClients(list);
-        });
-        return () => unsubscribe();
-      }, [db, appId]);
-
-      const filteredClients = clients.filter(c => 
-        c.name.toLowerCase().includes(search.toLowerCase()) || 
-        c.phone.includes(search)
-      );
-
-      return (
-        <div className="p-6 md:p-10 h-full flex flex-col fade-in">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="heading-font text-3xl">Clientes</h2>
-            <button className="hidden md:block btn-primary px-4 py-2 rounded text-sm font-bold">
-              <i className="fa-solid fa-plus mr-2"></i> Novo
-            </button>
-          </div>
-          
-          <div className="mb-6 relative">
-            <i className="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-            <input 
-              type="text" 
-              placeholder="Buscar por nome ou telefone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#1E1E1E] border border-[#333] rounded-xl py-3 pl-12 text-white focus:border-gold focus:outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto pb-20">
-            {filteredClients.map(client => (
-              <div 
-                key={client.id} 
-                onClick={() => onViewProfile(client)}
-                className="glass-panel p-5 rounded-xl cursor-pointer hover:border-gold transition-colors group"
-              >
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center font-bold text-xl group-hover:text-gold">
-                    {client.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg">{client.name}</h4>
-                    <p className="text-gray-400 text-sm">{client.phone}</p>
-                  </div>
-                </div>
-                <div className="border-t border-[#333] pt-3 flex justify-between text-xs text-gray-500">
-                  <span>Visitas: <span className="text-white">{client.totalVisits || 0}</span></span>
-                  <span className="text-gold group-hover:underline">Ver Prontuário →</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    const ClientProfile = ({ db, appId, client, onBack }) => {
-      const [history, setHistory] = useState([]);
-      const [showLightbox, setShowLightbox] = useState(null);
-
-      useEffect(() => {
-        // Fetch Service History (stored in a subcollection or separate collection linked by phone/clientId)
-        // Here assuming a separate collection 'service_records' linked by clientPhone for simplicity in this structure
-        const { collection, query, where, onSnapshot } = window.firebaseModules;
-        const q = query(
-          collection(db, 'artifacts', appId, 'public', 'data', 'service_records'),
-          where('clientPhone', '==', client.phone)
+            </aside>
         );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-          // Sort client side
-          const recs = snapshot.docs.map(d => d.data());
-          recs.sort((a,b) => new Date(b.date) - new Date(a.date));
-          setHistory(recs);
-        });
-        return () => unsubscribe();
-      }, [client]);
-
-      return (
-        <div className="h-full flex flex-col bg-[#121212] absolute top-0 left-0 w-full z-10 fade-in">
-          {/* Header */}
-          <div className="p-6 border-b border-[#333] flex items-center gap-4 bg-[#1E1E1E]">
-            <button onClick={onBack} className="w-10 h-10 rounded-full hover:bg-[#333] flex items-center justify-center">
-              <i className="fa-solid fa-arrow-left"></i>
-            </button>
-            <div className="flex-1">
-              <h2 className="heading-font text-2xl font-bold">{client.name}</h2>
-              <p className="text-gray-400 text-sm">{client.phone}</p>
-            </div>
-            <div className="text-right hidden md:block">
-              <p className="text-xs text-gray-500 uppercase">Total de Visitas</p>
-              <p className="text-xl font-bold text-gold">{client.totalVisits || 0}</p>
-            </div>
-          </div>
-
-          {/* Timeline */}
-          <div className="flex-1 overflow-auto p-6 md:p-10">
-            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-              <i className="fa-solid fa-clock-rotate-left text-gold"></i> Histórico de Estilo
-            </h3>
-
-            {history.length === 0 ? (
-              <div className="text-center text-gray-500 py-10 border border-dashed border-[#333] rounded-xl">
-                Nenhum registro histórico encontrado.
-              </div>
-            ) : (
-              <div className="space-y-8 relative before:absolute before:left-4 before:top-0 before:h-full before:w-0.5 before:bg-[#333]">
-                {history.map((record, idx) => (
-                  <div key={idx} className="relative pl-12">
-                    <div className="absolute left-[9px] top-0 w-4 h-4 rounded-full bg-gold-primary border-4 border-[#121212]"></div>
-                    
-                    <div className="glass-panel p-5 rounded-xl border border-[#333]">
-                      <div className="flex justify-between items-start mb-4 border-b border-[#333] pb-3">
-                        <div>
-                          <p className="text-gold font-bold">{record.service}</p>
-                          <p className="text-xs text-gray-400">{new Date(record.date).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                        {record.barber && <span className="text-xs bg-[#333] px-2 py-1 rounded">{record.barber}</span>}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase mb-1">Notas do Corte</p>
-                          <p className="text-sm text-gray-300">{record.notes || '-'}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase mb-1">Produtos</p>
-                          <p className="text-sm text-gray-300">{record.products || '-'}</p>
-                        </div>
-                      </div>
-
-                      {record.photos && record.photos.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-[#333]">
-                          <p className="text-xs text-gray-500 uppercase mb-2">Registro Fotográfico</p>
-                          <div className="flex gap-2 overflow-x-auto pb-2">
-                            {record.photos.map((photo, pIdx) => (
-                              <img 
-                                key={pIdx} 
-                                src={photo} 
-                                onClick={() => setShowLightbox(photo)}
-                                className="w-20 h-20 object-cover rounded-lg border border-[#333] cursor-pointer hover:border-gold" 
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {/* Lightbox */}
-          {showLightbox && (
-            <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowLightbox(null)}>
-              <img src={showLightbox} className="max-w-full max-h-full rounded shadow-2xl" />
-              <button className="absolute top-4 right-4 text-white text-3xl">&times;</button>
-            </div>
-          )}
-        </div>
-      );
     };
 
-    // 6. Finish Service Modal (The Connector)
-    const FinishServiceModal = ({ appt, onClose, db, appId, onStatusUpdate }) => {
-      const [notes, setNotes] = useState('');
-      const [products, setProducts] = useState('');
-      const [photos, setPhotos] = useState([]); // Array of base64 strings
-      const [saving, setSaving] = useState(false);
+    // --- Schedule Component (Timeline View) ---
 
-      const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        files.forEach(file => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setPhotos(prev => [...prev, reader.result]);
-          };
-          reader.readAsDataURL(file);
-        });
-      };
+    const ScheduleTimeline = ({ db, appId }) => {
+        const [appts, setAppts] = useState([]);
+        const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
 
-      const handleSave = async () => {
-        setSaving(true);
-        const { collection, addDoc, query, where, getDocs, updateDoc, doc, increment } = window.firebaseModules;
-        
-        try {
-          // 1. Add Service Record
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'service_records'), {
-            clientPhone: appt.phone,
-            clientName: appt.name,
-            service: appt.service,
-            date: appt.date,
-            notes,
-            products,
-            photos, // Storing base64 directly (Note: Firestore has 1MB doc limit, fine for demo/small thumbnails)
-            createdAt: new Date().toISOString()
-          });
-
-          // 2. Update Appointment Status
-          await onStatusUpdate(appt.id, 'realizado');
-
-          // 3. Increment Client Visits
-          const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
-          const q = query(clientsRef, where("phone", "==", appt.phone));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            const clientDoc = snap.docs[0];
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', clientDoc.id), {
-              totalVisits: (clientDoc.data().totalVisits || 0) + 1,
-              lastVisit: appt.date
+        useEffect(() => {
+            const { collection, onSnapshot, query, where } = window.firebaseModules;
+            const todayStr = new Date().toISOString().split('T')[0];
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), where('date', '==', todayStr));
+            return onSnapshot(q, snap => {
+                setAppts(snap.docs.map(d => ({id: d.id, ...d.data()})));
             });
-          }
+        }, [db, appId]);
 
-          onClose();
-        } catch (error) {
-          console.error(error);
-          alert("Erro ao salvar registro.");
-        }
-        setSaving(false);
-      };
+        const getStatusColor = (status) => {
+            switch(status) {
+                case 'confirmado': return 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400';
+                case 'realizado': return 'bg-blue-500/20 border-blue-500/50 text-blue-400';
+                case 'cancelado': return 'bg-red-500/20 border-red-500/50 text-red-400';
+                default: return 'bg-gold-500/20 border-gold-500/50 text-gold-400';
+            }
+        };
 
-      return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1E1E1E] w-full max-w-lg rounded-2xl border border-[#333] shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-[#333] flex justify-between items-center">
-              <h3 className="heading-font text-xl">Finalizar Atendimento</h3>
-              <button onClick={onClose} className="text-gray-500 hover:text-white"><i className="fa-solid fa-times text-xl"></i></button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto space-y-4">
-              <div className="bg-green-900/20 border border-green-900/50 p-3 rounded text-green-400 text-sm mb-4">
-                <i className="fa-solid fa-info-circle mr-2"></i>
-                Ao finalizar, o status será atualizado e os dados salvos no histórico do cliente.
-              </div>
+        const updateStatus = async (id, status) => {
+             const { doc, updateDoc } = window.firebaseModules;
+             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', id), { status });
+        };
 
-              <div>
-                <label className="block text-xs text-gray-500 uppercase mb-1">Notas do Serviço (Corte/Técnica)</label>
-                <textarea 
-                  className="w-full bg-[#121212] border border-[#333] rounded p-3 text-white focus:border-gold focus:outline-none"
-                  rows="3"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder="Ex: Disfarçado na 1, topo na tesoura..."
-                ></textarea>
-              </div>
-
-              <div>
-                <label className="block text-xs text-gray-500 uppercase mb-1">Produtos Utilizados</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-[#121212] border border-[#333] rounded p-3 text-white focus:border-gold focus:outline-none"
-                  value={products}
-                  onChange={e => setProducts(e.target.value)}
-                  placeholder="Ex: Pomada Matte, Óleo de Barba..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-gray-500 uppercase mb-2">Fotos do Resultado</label>
-                <div className="flex flex-wrap gap-2">
-                  <label className="w-20 h-20 border-2 border-dashed border-[#333] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gold hover:text-gold text-gray-500 transition-colors">
-                    <i className="fa-solid fa-camera mb-1"></i>
-                    <span className="text-[10px]">Add</span>
-                    <input type="file" className="hidden" accept="image/*" multiple onChange={handleFileChange} />
-                  </label>
-                  {photos.map((p, idx) => (
-                    <div key={idx} className="relative w-20 h-20 group">
-                      <img src={p} className="w-full h-full object-cover rounded-lg border border-[#333]" />
-                      <button 
-                        onClick={() => setPhotos(prev => prev.filter((_, i) => i !== idx))}
-                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
-                      >&times;</button>
-                    </div>
-                  ))}
+        return (
+            <div className="animate-slide-up pb-20">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-serif font-bold text-white">Agenda Hoje</h2>
+                    <span className="text-gray-400 text-sm">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                 </div>
-              </div>
-            </div>
 
-            <div className="p-5 border-t border-[#333] flex justify-end gap-3">
-              <button onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white">Cancelar</button>
-              <button 
-                onClick={handleSave} 
-                disabled={saving}
-                className="btn-primary px-6 py-2 rounded font-bold flex items-center gap-2"
-              >
-                {saving ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <><i className="fa-solid fa-check"></i> Concluir</>}
-              </button>
+                <div className="glass-panel rounded-2xl p-6 relative">
+                    <div className="absolute left-[3.2rem] top-6 bottom-6 w-px bg-white/10"></div>
+                    
+                    <div className="space-y-4">
+                        {hours.map(hour => {
+                            const match = appts.find(a => a.time.startsWith(hour.split(':')[0]));
+                            return (
+                                <div key={hour} className="flex gap-6 group min-h-[80px]">
+                                    <div className="w-12 text-sm font-bold text-gray-500 pt-1 text-right">{hour}</div>
+                                    <div className="flex-1 relative">
+                                        {match ? (
+                                            <div className={`p-4 rounded-xl border ${getStatusColor(match.status)} relative hover:scale-[1.01] transition-transform`}>
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className="font-bold text-white text-lg">{match.name}</h4>
+                                                        <p className="text-xs opacity-80 mt-1">{match.service}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        {match.status === 'pendente' && (
+                                                            <button onClick={() => updateStatus(match.id, 'confirmado')} className="w-8 h-8 rounded bg-emerald-500 text-black flex items-center justify-center hover:bg-emerald-400">
+                                                                <i className="fa-solid fa-check"></i>
+                                                            </button>
+                                                        )}
+                                                        {match.status === 'confirmado' && (
+                                                            <button onClick={() => updateStatus(match.id, 'realizado')} className="px-3 py-1 rounded bg-dark-bg border border-white/10 text-xs hover:bg-white/10 transition">
+                                                                Finalizar
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="h-full border border-dashed border-white/5 rounded-xl flex items-center justify-center text-gray-700 text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                                Livre
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      );
+        );
     };
 
-    // --- Main Admin Layout ---
+    const ClientDirectory = ({ db, appId }) => {
+        // Simplified client list
+        const [clients, setClients] = useState([]);
+        useEffect(() => {
+            const { collection, onSnapshot, limit, query } = window.firebaseModules;
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), limit(20));
+            return onSnapshot(q, s => setClients(s.docs.map(d => ({id:d.id, ...d.data()}))));
+        }, [db, appId]);
 
-    const AdminLayout = ({ db, appId, onLogout }) => {
-      const [activeTab, setActiveTab] = useState('dashboard');
-      const [selectedClient, setSelectedClient] = useState(null);
-
-      const renderContent = () => {
-        if (selectedClient) {
-          return <ClientProfile db={db} appId={appId} client={selectedClient} onBack={() => setSelectedClient(null)} />;
-        }
-
-        switch (activeTab) {
-          case 'dashboard': return <Dashboard db={db} appId={appId} />;
-          case 'schedule': return <Schedule db={db} appId={appId} />;
-          case 'clients': return <ClientList db={db} appId={appId} onViewProfile={setSelectedClient} />;
-          case 'services': return <div className="p-10 text-gray-500">Configurações de Serviços (Em Breve)</div>;
-          default: return <Dashboard db={db} appId={appId} />;
-        }
-      };
-
-      return (
-        <div className="flex min-h-screen bg-[#121212]">
-          <Navigation activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} />
-          <div className="flex-1 ml-0 md:ml-64 relative">
-            {/* Top Bar Mobile */}
-            <div className="md:hidden p-4 border-b border-[#333] flex justify-between items-center bg-[#1E1E1E]">
-              <h1 className="heading-font text-xl text-gold font-bold">BARBERPRO</h1>
-              <div className="w-8 h-8 rounded-full bg-gray-700"></div>
+        return (
+            <div className="animate-slide-up pb-20">
+                <h2 className="text-3xl font-serif font-bold text-white mb-6">Clientes VIP</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {clients.map(c => (
+                        <div key={c.id} className="glass-panel p-5 rounded-xl hover:border-gold-500/50 transition-all cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center font-serif text-gold-500 font-bold text-xl">
+                                    {c.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-white group-hover:text-gold-500 transition-colors">{c.name}</h4>
+                                    <p className="text-xs text-gray-500">{c.phone}</p>
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-3 border-t border-white/5 flex justify-between text-xs">
+                                <span className="text-gray-500">Visitas: <strong className="text-white">{c.totalVisits || 0}</strong></span>
+                                <span className="text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{c.tags?.[0] || 'Cliente'}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-            
-            {/* Content Area */}
-            <main className="h-[calc(100vh-60px)] md:h-screen overflow-auto relative">
-              {renderContent()}
-            </main>
-          </div>
-        </div>
-      );
+        );
     };
 
-    // --- App Root ---
+    // --- Main Wrapper ---
 
     const App = () => {
-      const { db, auth, user, appId } = useFirebase();
-      const [view, setView] = useState('client'); // 'client', 'login', 'admin'
-      const [password, setPassword] = useState('');
+        const { db, user, appId } = useFirebase();
+        const { toast, showToast } = useToast();
+        const [view, setView] = useState('landing'); 
+        const [adminTab, setAdminTab] = useState('dashboard');
+        const [password, setPassword] = useState('');
 
-      if (!db || !user) return <Loading />;
+        if (!db || !user) return <Loading />;
 
-      const handleLogin = (e) => {
-        e.preventDefault();
-        // Simple hardcoded auth for demo purposes as requested
-        if (password === 'admin123') {
-          setView('admin');
-        } else {
-          alert('Senha incorreta');
+        const handleLogin = (e) => {
+            e.preventDefault();
+            if (password === 'admin') {
+                setView('admin');
+                showToast('Bem-vindo, Mestre!', 'success');
+            } else {
+                showToast('Senha incorreta', 'error');
+            }
+        };
+
+        if (view === 'admin') {
+            return (
+                <div className="flex min-h-screen bg-black text-gray-200 font-sans selection:bg-gold-500 selection:text-black">
+                    {toast && <Toast message={toast.message} type={toast.type} />}
+                    <Sidebar activeTab={adminTab} setActiveTab={setAdminTab} onLogout={() => setView('landing')} />
+                    
+                    <main className="flex-1 ml-0 md:ml-20 lg:ml-64 p-6 lg:p-10 relative overflow-hidden">
+                        {/* Mobile Header */}
+                        <div className="md:hidden flex justify-between items-center mb-8">
+                            <h1 className="font-serif text-xl font-bold text-gold-500">BarberPro</h1>
+                            <div className="w-8 h-8 bg-gray-800 rounded-full"></div>
+                        </div>
+
+                        {adminTab === 'dashboard' && <DashboardView db={db} appId={appId} />}
+                        {adminTab === 'schedule' && <ScheduleTimeline db={db} appId={appId} />}
+                        {adminTab === 'clients' && <ClientDirectory db={db} appId={appId} />}
+                        {adminTab === 'financial' && <div className="text-center py-20 text-gray-500">Módulo Financeiro em Desenvolvimento</div>}
+                        
+                        {/* Mobile Nav */}
+                        <div className="md:hidden fixed bottom-0 left-0 w-full glass-panel border-t border-white/10 flex justify-around p-3 z-50">
+                            {['dashboard', 'schedule', 'clients'].map(t => (
+                                <button key={t} onClick={() => setAdminTab(t)} className={`${adminTab === t ? 'text-gold-500' : 'text-gray-500'}`}>
+                                    <i className={`fa-solid ${t === 'dashboard' ? 'fa-chart-pie' : t === 'schedule' ? 'fa-calendar' : 'fa-users'} text-xl`}></i>
+                                </button>
+                            ))}
+                        </div>
+                    </main>
+                </div>
+            );
         }
-      };
 
-      // Admin Login Screen
-      if (view === 'login') {
+        if (view === 'login') {
+            return (
+                <div className="min-h-screen flex items-center justify-center p-6 bg-black">
+                    {toast && <Toast message={toast.message} type={toast.type} />}
+                    <div className="w-full max-w-sm">
+                        <div className="text-center mb-8 animate-slide-up">
+                            <div className="w-16 h-16 bg-gold-500 rounded-2xl mx-auto flex items-center justify-center text-3xl font-bold text-black font-serif mb-4 shadow-[0_0_40px_rgba(212,175,55,0.4)]">B</div>
+                            <h2 className="text-2xl font-serif font-bold text-white">Área Restrita</h2>
+                        </div>
+                        <form onSubmit={handleLogin} className="space-y-4 animate-slide-up stagger-1">
+                            <div className="glass-panel p-1 rounded-xl flex items-center px-4 border focus-within:border-gold-500 transition-colors">
+                                <i className="fa-solid fa-lock text-gray-500 mr-3"></i>
+                                <input 
+                                    type="password" 
+                                    placeholder="Senha de acesso" 
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    className="bg-transparent border-none text-white w-full py-3 focus:outline-none"
+                                />
+                            </div>
+                            <button type="submit" className="w-full bg-gold-500 text-black font-bold py-3 rounded-xl hover:bg-gold-400 transition shadow-[0_4px_20px_rgba(212,175,55,0.2)]">
+                                Entrar
+                            </button>
+                        </form>
+                        <button onClick={() => setView('landing')} className="w-full text-center mt-6 text-xs text-gray-500 hover:text-white transition">
+                            Voltar para Agendamento
+                        </button>
+                    </div>
+                </div>
+            )
+        }
+
+        // Default: Landing / Booking
         return (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="glass-panel p-8 rounded-2xl w-full max-w-sm border-t border-gold/50 shadow-2xl fade-in">
-              <div className="text-center mb-8">
-                <h2 className="heading-font text-2xl text-white">Área Restrita</h2>
-                <p className="text-sm text-gray-500">Acesso Profissional</p>
-              </div>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Senha de Acesso"
-                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
-                />
-                <button type="submit" className="w-full btn-primary py-3 rounded-lg font-bold">Entrar</button>
-              </form>
-              <button onClick={() => setView('client')} className="w-full mt-4 text-xs text-gray-500 hover:text-white">
-                Voltar ao Agendamento
-              </button>
+            <div className="bg-black min-h-screen font-sans text-gray-200 selection:bg-gold-500 selection:text-black">
+                {toast && <Toast message={toast.message} type={toast.type} />}
+                <ClientBookingV2 db={db} appId={appId} onAdminRequest={() => setView('login')} showToast={showToast} />
             </div>
-          </div>
         );
-      }
-
-      // Admin Panel
-      if (view === 'admin') {
-        return <AdminLayout db={db} appId={appId} onLogout={() => { setView('client'); setPassword(''); }} />;
-      }
-
-      // Default: Client Booking
-      return <ClientBooking db={db} appId={appId} onAdminLogin={() => setView('login')} />;
     };
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
