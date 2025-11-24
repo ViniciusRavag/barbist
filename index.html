@@ -119,20 +119,20 @@
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-default';
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
     
-    // Configuração de Fallback CRÍTICA com projectId (CORRIGIDO AQUI)
-    const defaultConfig = {
+    // CONFIGURAÇÃO FORNECIDA PELO USUÁRIO (Hardcoded como fallback robusto)
+    const USER_PROVIDED_CONFIG = {
       apiKey: "AIzaSyCgx6yZxS8w54CMTcX_dql7NNDJq5uhEn0",
-      authDomain: "default-barber-pro.firebaseapp.com",
-      projectId: "default-barber-pro", 
-      storageBucket: "default-barber-pro.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef1234567890"
+      authDomain: "barbearia-agendamentos-9ad41.firebaseapp.com",
+      projectId: "barbearia-agendamentos-9ad41",
+      storageBucket: "barbearia-agendamentos-9ad41.firebasestorage.app",
+      messagingSenderId: "612905646934",
+      appId: "1:612905646934:web:d4715b8eb14bc7d821f4f7"
     };
 
-    // Tenta usar a config do ambiente, se falhar ou estiver vazia, usa a config de fallback
+    // Tenta usar a config do ambiente; se falhar ou estiver vazia, usa a configuração do usuário.
     const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
         ? JSON.parse(__firebase_config) 
-        : defaultConfig;
+        : USER_PROVIDED_CONFIG;
     
     // Initialize Firebase
     let db, auth;
@@ -140,7 +140,8 @@
 
     try {
       if (!firebaseConfig.projectId) {
-         throw new Error("Projeto ID do Firebase não fornecido mesmo com fallback.");
+         // Esta verificação deve ser redundante agora, mas é um bom ponto de segurança.
+         throw new Error("Projeto ID do Firebase não fornecido.");
       }
       
       const app = initializeApp(firebaseConfig);
