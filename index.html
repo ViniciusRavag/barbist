@@ -1,983 +1,1017 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BarberPro | Gestão & Agendamento</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarberPro - Gestão Premium</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold-primary: #D4AF37;
+      --gold-light: #F4E7C1;
+      --dark-bg: #121212;
+      --dark-card: #1E1E1E;
+      --glass-bg: rgba(30, 30, 30, 0.7);
+      --glass-border: rgba(212, 175, 55, 0.15);
+    }
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        gold: {
-                            400: '#D4AF37',
-                            500: '#C5A028',
-                            600: '#B08D22',
-                        },
-                        dark: {
-                            bg: '#121212',
-                            surface: '#1E1E1E',
-                            surfaceHighlight: '#2A2A2A',
-                            border: '#333333'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Playfair Display', 'serif'],
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out forwards',
-                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--dark-bg);
+      background-image: radial-gradient(circle at top right, #2a2a2a 0%, #121212 100%);
+      color: #E0E0E0;
+    }
+    
+    .heading-font {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333; 
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-primary); 
+    }
 
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    /* Glassmorphism Classes */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
 
-    <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #121212; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-primary) 0%, #b4932a 100%);
+      color: #121212;
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
 
-        body {
-            background-color: #121212;
-            color: #E0E0E0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .glass-panel {
-            background: rgba(30, 30, 30, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .gold-gradient-text {
-            background: linear-gradient(135deg, #FFE082 0%, #D4AF37 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .btn-gold {
-            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
-            color: #121212;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-        }
-
-        .input-dark {
-            background: #2A2A2A;
-            border: 1px solid #333;
-            color: white;
-            transition: all 0.2s;
-        }
-        .input-dark:focus {
-            border-color: #D4AF37;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
-        }
-
-        /* Mobile Bottom Nav Active State */
-        .nav-item.active i { color: #D4AF37; }
-        .nav-item.active span { color: #D4AF37; }
-        
-        .loader {
-            border-top-color: #D4AF37;
-            -webkit-animation: spinner 1.5s linear infinite;
-            animation: spinner 1.5s linear infinite;
-        }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    .text-gold { color: var(--gold-primary); }
+    .border-gold { border-color: var(--gold-primary); }
+    
+    /* Animations */
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body class="flex flex-col min-h-screen font-sans antialiased selection:bg-gold-400 selection:text-black">
+<body>
+  <div id="root"></div>
 
-    <!-- Global Loader -->
-    <div id="global-loader" class="fixed inset-0 z-50 flex items-center justify-center bg-dark-bg">
-        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 h-12 w-12"></div>
-    </div>
+  <!-- Firebase Configuration (Placeholder for logic) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed top-4 right-4 z-[100] transform translate-x-full transition-transform duration-300">
-        <div class="glass-panel px-6 py-4 rounded-lg shadow-2xl border-l-4 border-gold-400 flex items-center gap-3">
-            <i class="fas fa-info-circle text-gold-400"></i>
-            <span id="toast-message" class="font-medium">Notificação</span>
-        </div>
-    </div>
+    // Setup global firebase instances for React to access
+    window.firebaseModules = {
+      initializeApp, getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken,
+      getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, limit
+    };
+  </script>
 
-    <!-- MAIN APP CONTAINER -->
-    <main id="app-container" class="flex-grow w-full max-w-md mx-auto md:max-w-4xl md:border-x md:border-dark-border min-h-screen relative overflow-hidden">
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // --- Firebase Init Hook ---
+    const useFirebase = () => {
+      const [db, setDb] = useState(null);
+      const [auth, setAuth] = useState(null);
+      const [user, setUser] = useState(null);
+      const [appId, setAppId] = useState('default-barber-app');
+
+      useEffect(() => {
+        const { initializeApp, getAuth, getFirestore, signInAnonymously, onAuthStateChanged, signInWithCustomToken } = window.firebaseModules;
         
-        <!-- === VIEW: WELCOME / LANDING === -->
-        <section id="view-landing" class="h-full flex flex-col p-6 items-center justify-center animate-fade-in absolute inset-0 bg-[url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center">
-            <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/90 to-dark-bg/40"></div>
-            
-            <div class="relative z-10 text-center space-y-6 w-full max-w-sm">
-                <div class="w-20 h-20 mx-auto rounded-full border-2 border-gold-400 flex items-center justify-center mb-4 backdrop-blur-sm">
-                    <i class="fas fa-cut text-3xl text-gold-400"></i>
-                </div>
-                <h1 class="font-display text-5xl font-bold gold-gradient-text tracking-tight">BarberPro</h1>
-                <p class="text-gray-400 text-lg">Estilo e tradição em cada detalhe.</p>
-                
-                <div class="space-y-3 pt-8">
-                    <button onclick="router.navigate('booking')" class="w-full btn-gold font-bold py-4 rounded-xl text-lg transition transform hover:scale-[1.02]">
-                        Agendar Horário
-                    </button>
-                    <button onclick="router.navigate('client-login')" class="w-full bg-dark-surfaceHighlight border border-dark-border text-white font-medium py-4 rounded-xl transition hover:border-gold-400">
-                        Meus Agendamentos
-                    </button>
-                </div>
-                
-                <p onclick="router.navigate('admin-login')" class="mt-8 text-xs text-gray-500 cursor-pointer hover:text-gold-400 transition uppercase tracking-widest">
-                    Acesso Profissional
-                </p>
-            </div>
-        </section>
+        // Config Mock
+        const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "mock" };
+        const app = initializeApp(config);
+        const authInstance = getAuth(app);
+        const dbInstance = getFirestore(app);
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'barber-pro-v1';
 
-        <!-- === VIEW: BOOKING WIZARD === -->
-        <section id="view-booking" class="hidden h-screen flex flex-col bg-dark-bg animate-slide-up">
-            <!-- Header -->
-            <header class="p-4 border-b border-dark-border flex items-center justify-between sticky top-0 bg-dark-bg/95 backdrop-blur z-20">
-                <button onclick="router.back()" class="p-2 text-gray-400 hover:text-white"><i class="fas fa-arrow-left text-xl"></i></button>
-                <h2 class="font-display text-xl font-bold text-white">Novo Agendamento</h2>
-                <div class="w-8"></div>
-            </header>
+        setDb(dbInstance);
+        setAuth(authInstance);
+        setAppId(currentAppId);
 
-            <div class="flex-grow overflow-y-auto p-4 space-y-8 pb-24">
-                <!-- Step 1: Services -->
-                <div>
-                    <h3 class="text-gold-400 text-sm font-bold uppercase tracking-wider mb-3">1. Selecione o Serviço</h3>
-                    <div id="service-list" class="grid grid-cols-1 gap-3">
-                        <!-- Injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Step 2: Date & Time -->
-                <div id="datetime-section" class="opacity-50 pointer-events-none transition-opacity duration-300">
-                    <h3 class="text-gold-400 text-sm font-bold uppercase tracking-wider mb-3">2. Data e Hora</h3>
-                    
-                    <!-- Horizontal Date Scroller -->
-                    <div class="flex overflow-x-auto gap-3 pb-4 scrollbar-hide" id="date-scroller">
-                        <!-- Injected via JS -->
-                    </div>
-
-                    <!-- Time Grid -->
-                    <div id="time-grid" class="grid grid-cols-4 gap-2 mt-2">
-                        <div class="col-span-4 text-center text-gray-500 py-4 text-sm">Selecione uma data primeiro</div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Client Info -->
-                <div id="client-info-section" class="opacity-50 pointer-events-none transition-opacity duration-300">
-                    <h3 class="text-gold-400 text-sm font-bold uppercase tracking-wider mb-3">3. Seus Dados</h3>
-                    <div class="glass-panel p-4 rounded-xl space-y-4">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Nome Completo</label>
-                            <div class="relative">
-                                <i class="fas fa-user absolute left-3 top-3.5 text-gray-500"></i>
-                                <input type="text" id="booking-name" class="w-full input-dark pl-10 pr-4 py-3 rounded-lg" placeholder="Seu nome">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">WhatsApp</label>
-                            <div class="relative">
-                                <i class="fab fa-whatsapp absolute left-3 top-3.5 text-gray-500"></i>
-                                <input type="tel" id="booking-phone" class="w-full input-dark pl-10 pr-4 py-3 rounded-lg" placeholder="(00) 00000-0000">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer Action -->
-            <div class="p-4 border-t border-dark-border bg-dark-bg absolute bottom-0 w-full z-30">
-                <button id="confirm-booking-btn" onclick="booking.submit()" disabled class="w-full btn-gold font-bold py-4 rounded-xl opacity-50 cursor-not-allowed transition-all shadow-lg flex justify-center items-center gap-2">
-                    <span>Confirmar Agendamento</span>
-                    <i class="fas fa-check"></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- === VIEW: CLIENT APPOINTMENTS === -->
-        <section id="view-client-login" class="hidden h-screen flex flex-col bg-dark-bg animate-slide-up">
-            <header class="p-4 flex items-center">
-                <button onclick="router.back()" class="p-2"><i class="fas fa-arrow-left"></i></button>
-                <h2 class="ml-4 font-bold text-lg">Meus Agendamentos</h2>
-            </header>
-            <div class="p-6 flex flex-col justify-center h-[80vh]">
-                <div class="glass-panel p-6 rounded-2xl space-y-6">
-                    <div class="text-center">
-                        <i class="fas fa-mobile-alt text-4xl text-gold-400 mb-4"></i>
-                        <p class="text-gray-400 text-sm">Digite seu número para visualizar seu histórico.</p>
-                    </div>
-                    <input type="tel" id="login-phone" class="w-full input-dark py-3 px-4 rounded-lg text-center text-lg tracking-widest" placeholder="(99) 99999-9999">
-                    <button onclick="clientPortal.check()" class="w-full btn-gold py-3 rounded-lg font-bold">Acessar</button>
-                </div>
-                <div id="client-list-results" class="mt-6 space-y-3 overflow-y-auto max-h-[40vh]">
-                    <!-- Results -->
-                </div>
-            </div>
-        </section>
-
-        <!-- === VIEW: ADMIN LOGIN === -->
-        <section id="view-admin-login" class="hidden h-screen flex flex-col bg-dark-bg animate-fade-in items-center justify-center p-6">
-            <div class="w-full max-w-sm glass-panel p-8 rounded-2xl border border-gold-400/30">
-                <h2 class="text-2xl font-display font-bold text-center mb-6">Área Restrita</h2>
-                <div class="space-y-4">
-                    <input type="password" id="admin-pass" class="w-full input-dark p-4 rounded-lg" placeholder="Senha de acesso">
-                    <button onclick="admin.login()" class="w-full btn-gold py-3 rounded-lg font-bold">Entrar</button>
-                </div>
-                <p onclick="router.navigate('landing')" class="text-center mt-6 text-sm text-gray-500 cursor-pointer">Voltar</p>
-            </div>
-        </section>
-
-        <!-- === VIEW: ADMIN DASHBOARD (Authenticated) === -->
-        <section id="view-admin-dashboard" class="hidden h-screen flex flex-col bg-dark-bg animate-fade-in">
-            <!-- Admin Top Bar -->
-            <header class="p-4 border-b border-dark-border flex justify-between items-center bg-dark-surface">
-                <h1 class="font-display font-bold text-xl text-gold-400">Dashboard</h1>
-                <button onclick="admin.logout()" class="text-xs text-gray-400 hover:text-white uppercase"><i class="fas fa-sign-out-alt mr-1"></i> Sair</button>
-            </header>
-
-            <!-- Admin Content Area -->
-            <div id="admin-content-area" class="flex-grow overflow-y-auto pb-24 p-4">
-                
-                <!-- Tab: Overview/Agenda (Default) -->
-                <div id="tab-agenda" class="admin-tab space-y-6">
-                    <!-- Metrics Row -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="glass-panel p-4 rounded-xl border-l-2 border-gold-400">
-                            <p class="text-xs text-gray-400 uppercase">Hoje</p>
-                            <p class="text-2xl font-bold mt-1" id="metric-today-count">0</p>
-                            <p class="text-xs text-green-400 mt-1">Agendados</p>
-                        </div>
-                        <div class="glass-panel p-4 rounded-xl border-l-2 border-green-500">
-                            <p class="text-xs text-gray-400 uppercase">Faturamento</p>
-                            <p class="text-2xl font-bold mt-1 text-green-400" id="metric-revenue">R$ 0</p>
-                            <p class="text-xs text-gray-500 mt-1">Estimado (Hoje)</p>
-                        </div>
-                    </div>
-
-                    <!-- Agenda List -->
-                    <div>
-                        <div class="flex justify-between items-end mb-4">
-                            <h3 class="text-lg font-bold text-white">Agenda do Dia</h3>
-                            <span class="text-xs text-gold-400 bg-gold-400/10 px-2 py-1 rounded" id="current-date-display">Hoje</span>
-                        </div>
-                        <div id="admin-agenda-list" class="space-y-3">
-                            <!-- Items injected via JS -->
-                            <div class="text-center py-10 text-gray-600">Carregando agenda...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab: Clients (CRM) -->
-                <div id="tab-clients" class="admin-tab hidden space-y-4">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-4 top-3.5 text-gray-500"></i>
-                        <input type="text" id="client-search" onkeyup="crm.filter()" placeholder="Buscar cliente..." class="w-full input-dark pl-12 py-3 rounded-xl">
-                    </div>
-                    
-                    <div id="crm-client-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Client Cards injected JS -->
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Admin Bottom Nav -->
-            <nav class="border-t border-dark-border bg-dark-surface/95 backdrop-blur absolute bottom-0 w-full flex justify-around py-3 pb-safe z-40">
-                <button onclick="admin.switchTab('agenda')" class="nav-item active flex flex-col items-center gap-1 w-full text-gray-500 transition">
-                    <i class="fas fa-calendar-alt text-lg"></i>
-                    <span class="text-[10px] font-medium uppercase">Agenda</span>
-                </button>
-                <button onclick="admin.switchTab('clients')" class="nav-item flex flex-col items-center gap-1 w-full text-gray-500 transition">
-                    <i class="fas fa-users text-lg"></i>
-                    <span class="text-[10px] font-medium uppercase">Clientes</span>
-                </button>
-            </nav>
-        </section>
-
-        <!-- === VIEW: CLIENT DETAIL (CRM DEEP DIVE) === -->
-        <section id="view-client-detail" class="hidden h-screen flex flex-col bg-dark-bg absolute inset-0 z-50 animate-slide-up">
-            <div class="bg-dark-surface border-b border-dark-border p-4 flex justify-between items-center sticky top-0 z-10">
-                <button onclick="router.back()" class="p-2 bg-dark-bg rounded-full w-10 h-10 flex items-center justify-center border border-dark-border"><i class="fas fa-arrow-left"></i></button>
-                <div class="text-right">
-                    <h2 class="font-bold text-lg text-white" id="detail-client-name">Nome Cliente</h2>
-                    <p class="text-xs text-gold-400" id="detail-client-phone">Telefone</p>
-                </div>
-            </div>
-
-            <div class="flex-grow overflow-y-auto p-4 space-y-6 pb-20">
-                <!-- Quick Stats -->
-                <div class="grid grid-cols-3 gap-2 text-center">
-                    <div class="bg-dark-surface p-3 rounded-lg">
-                        <span class="block text-xl font-bold text-white" id="detail-visits">0</span>
-                        <span class="text-[10px] text-gray-400 uppercase">Visitas</span>
-                    </div>
-                    <div class="bg-dark-surface p-3 rounded-lg">
-                        <span class="block text-xl font-bold text-green-400" id="detail-ltv">R$0</span>
-                        <span class="text-[10px] text-gray-400 uppercase">Total Gasto</span>
-                    </div>
-                    <div class="bg-dark-surface p-3 rounded-lg">
-                        <i class="fas fa-camera text-gold-400 text-xl mb-1 block"></i>
-                        <span class="text-[10px] text-gray-400 uppercase">Galeria</span>
-                    </div>
-                </div>
-
-                <!-- Add New Record Button -->
-                <button onclick="crm.openLogModal()" class="w-full py-3 border border-dashed border-gray-600 rounded-xl text-gray-400 hover:border-gold-400 hover:text-gold-400 transition flex items-center justify-center gap-2">
-                    <i class="fas fa-plus"></i> Adicionar Registro (Passport)
-                </button>
-
-                <!-- Timeline / Passport -->
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest pl-1">Histórico de Estilo</h3>
-                    <div id="detail-timeline" class="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-0 before:w-0.5 before:bg-gray-800">
-                        <!-- Timeline items injected here -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- === MODAL: ADD LOG (Checkout) === -->
-        <div id="modal-log" class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center">
-            <div class="bg-dark-surface w-full max-w-lg sm:rounded-2xl rounded-t-2xl p-6 animate-slide-up max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold text-gold-400">Registrar Atendimento</h3>
-                    <button onclick="ui.closeModal('modal-log')" class="text-gray-400"><i class="fas fa-times text-xl"></i></button>
-                </div>
-                
-                <form id="form-log" onsubmit="crm.saveLog(event)" class="space-y-4">
-                    <input type="hidden" id="log-client-id">
-                    
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-2">Serviço Realizado</label>
-                        <select id="log-service" class="w-full input-dark p-3 rounded-lg">
-                            <option value="Corte de Cabelo">Corte de Cabelo</option>
-                            <option value="Barba">Barba</option>
-                            <option value="Cabelo + Barba">Cabelo + Barba</option>
-                        </select>
-                    </div>
-
-                    <!-- Photo Upload Simulation -->
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-2">Foto do Resultado</label>
-                        <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-gold-400 transition cursor-pointer" onclick="document.getElementById('log-photo-input').click()">
-                            <i class="fas fa-camera text-2xl text-gray-500 mb-2"></i>
-                            <p class="text-sm text-gray-400">Clique para adicionar foto</p>
-                        </div>
-                        <input type="file" id="log-photo-input" accept="image/*" class="hidden" onchange="crm.handlePhotoPreview(this)">
-                        <div id="photo-preview-area" class="mt-2 hidden">
-                            <img id="photo-preview-img" src="" class="h-32 rounded-lg object-cover border border-gold-400">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-2">Notas Técnicas / Produtos</label>
-                        <textarea id="log-notes" rows="3" class="w-full input-dark p-3 rounded-lg" placeholder="Ex: Fade alto, Pomada Matte, Lâmina X..."></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full btn-gold font-bold py-3 rounded-xl mt-4">Salvar Registro</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- === IMAGE LIGHTBOX === -->
-        <div id="lightbox" onclick="this.classList.add('hidden')" class="hidden fixed inset-0 z-[70] bg-black flex items-center justify-center p-2">
-            <img id="lightbox-img" src="" class="max-w-full max-h-full rounded shadow-2xl border border-gold-400">
-        </div>
-
-    </main>
-
-    <!-- FIREBASE SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, where, getDocs, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // CONFIG (Placeholder - Environment Handles Key)
-        const firebaseConfig = {
-            apiKey: "", 
-            authDomain: "project-id.firebaseapp.com",
-            projectId: "project-id",
+        const initAuth = async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(authInstance, __initial_auth_token);
+          } else {
+            await signInAnonymously(authInstance);
+          }
         };
-
-        // --- INIT ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let currentUser = null;
-        let appId = 'barber-shop-demo-v1'; // Namespace for data isolation
-
-        // --- AUTHENTICATION ---
-        async function initAuth() {
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Auth Error", error);
-            }
-        }
-        
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                // document.getElementById('global-loader').classList.add('hidden');
-                initListeners();
-            }
-        });
 
         initAuth();
+        return onAuthStateChanged(authInstance, setUser);
+      }, []);
 
-        // --- STATE & CONSTANTS ---
-        const SERVICES = [
-            { id: 1, name: 'Corte de Cabelo', price: 50, duration: 45, icon: 'fa-cut' },
-            { id: 2, name: 'Barba Terapia', price: 35, duration: 30, icon: 'fa-pump-soap' },
-            { id: 3, name: 'Combo (Cabelo + Barba)', price: 75, duration: 60, icon: 'fa-user-tie' },
-            { id: 4, name: 'Pezinho / Acabamento', price: 20, duration: 15, icon: 'fa-ruler-combined' }
-        ];
+      return { db, auth, user, appId };
+    };
 
-        let state = {
-            booking: { service: null, date: null, time: null },
-            appointments: [],
-            clients: [],
-            logs: [],
-            currentView: 'landing',
-            adminMode: false
-        };
+    // --- Components ---
 
-        // --- ROUTER & UI HELPERS ---
-        window.router = {
-            history: [],
-            navigate: (viewId) => {
-                // Hide all main sections
-                document.querySelectorAll('section[id^="view-"]').forEach(el => {
-                    el.classList.add('hidden');
-                    el.classList.remove('animate-fade-in', 'animate-slide-up');
-                });
-                
-                // Show target
-                const target = document.getElementById(`view-${viewId}`);
-                target.classList.remove('hidden');
-                
-                // Animation logic based on context
-                if (viewId === 'booking' || viewId === 'client-detail') {
-                    target.classList.add('animate-slide-up');
-                } else {
-                    target.classList.add('animate-fade-in');
-                }
+    // 1. Loading Spinner
+    const Loading = () => (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
+      </div>
+    );
 
-                window.router.history.push(viewId);
-                state.currentView = viewId;
-                window.scrollTo(0,0);
-            },
-            back: () => {
-                const current = window.router.history.pop();
-                const prev = window.router.history[window.router.history.length - 1] || 'landing';
-                window.router.navigate(prev);
-                window.router.history.pop(); // Remove the duplicate push from navigate
-            }
-        };
+    // 2. Navigation Sidebar (Desktop) / Bottom Bar (Mobile)
+    const Navigation = ({ activeTab, setActiveTab, onLogout }) => {
+      const menuItems = [
+        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
+        { id: 'schedule', icon: 'fa-calendar-days', label: 'Agenda' },
+        { id: 'clients', icon: 'fa-users', label: 'Clientes' },
+        { id: 'services', icon: 'fa-scissors', label: 'Serviços' },
+      ];
 
-        window.ui = {
-            toast: (msg) => {
-                const el = document.getElementById('toast');
-                document.getElementById('toast-message').textContent = msg;
-                el.classList.remove('translate-x-full');
-                setTimeout(() => el.classList.add('translate-x-full'), 3000);
-            },
-            formatDate: (dateStr) => {
-                if(!dateStr) return '';
-                const date = new Date(dateStr + 'T12:00:00'); // Prevent Timezone shift
-                return date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
-            },
-            formatMoney: (val) => `R$ ${val.toFixed(2)}`,
-            closeModal: (id) => document.getElementById(id).classList.add('hidden'),
-            openModal: (id) => document.getElementById(id).classList.remove('hidden'),
-            lightbox: (src) => {
-                document.getElementById('lightbox-img').src = src;
-                document.getElementById('lightbox').classList.remove('hidden');
-            }
-        };
+      return (
+        <>
+          {/* Desktop Sidebar */}
+          <div className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 glass-panel border-r border-[#333] z-20">
+            <div className="p-8 text-center border-b border-[#333]">
+              <h1 className="heading-font text-2xl text-gold font-bold tracking-wider">BARBER<span className="text-white">PRO</span></h1>
+              <p className="text-xs text-gray-400 mt-2">Sistema Integrado</p>
+            </div>
+            <nav className="flex-1 py-6 px-4 space-y-2">
+              {menuItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
+                    activeTab === item.id 
+                      ? 'bg-[#D4AF37] text-black font-bold shadow-lg' 
+                      : 'text-gray-400 hover:bg-[#333] hover:text-white'
+                  }`}
+                >
+                  <i className={`fa-solid ${item.icon} w-6`}></i>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="p-4 border-t border-[#333]">
+              <button onClick={onLogout} className="w-full flex items-center p-3 text-red-400 hover:bg-red-500/10 rounded-lg transition">
+                <i className="fa-solid fa-right-from-bracket w-6"></i>
+                <span>Sair</span>
+              </button>
+            </div>
+          </div>
 
-        // --- BOOKING LOGIC ---
-        window.booking = {
-            init: () => {
-                // Render Services
-                const list = document.getElementById('service-list');
-                list.innerHTML = SERVICES.map(s => `
-                    <div onclick="booking.selectService(${s.id}, this)" class="service-card cursor-pointer glass-panel p-4 rounded-xl flex items-center justify-between border border-transparent hover:border-gold-400 transition group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full bg-dark-surfaceHighlight flex items-center justify-center group-hover:bg-gold-400 group-hover:text-black transition">
-                                <i class="fas ${s.icon} text-gold-400 group-hover:text-black"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-white">${s.name}</h4>
-                                <p class="text-xs text-gray-400">${s.duration} min</p>
-                            </div>
-                        </div>
-                        <span class="font-bold text-gold-400">R$ ${s.price}</span>
-                    </div>
-                `).join('');
+          {/* Mobile Bottom Nav */}
+          <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#1E1E1E] border-t border-[#333] flex justify-around p-3 z-50">
+            {menuItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex flex-col items-center text-xs ${activeTab === item.id ? 'text-gold' : 'text-gray-500'}`}
+              >
+                <i className={`fa-solid ${item.icon} text-lg mb-1`}></i>
+                {item.label}
+              </button>
+            ))}
+            <button onClick={onLogout} className="flex flex-col items-center text-xs text-red-400">
+              <i className="fa-solid fa-right-from-bracket text-lg mb-1"></i>
+              Sair
+            </button>
+          </div>
+        </>
+      );
+    };
 
-                // Render Dates (Next 7 days)
-                const dateScroller = document.getElementById('date-scroller');
-                dateScroller.innerHTML = '';
-                const today = new Date();
-                
-                for(let i=0; i<7; i++) {
-                    const d = new Date(today);
-                    d.setDate(today.getDate() + i);
-                    const iso = d.toISOString().split('T')[0];
-                    const dayName = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
-                    const dayNum = d.getDate();
+    // 3. Client Booking View (Public)
+    const ClientBooking = ({ db, appId, onAdminLogin }) => {
+      const [step, setStep] = useState(1);
+      const [formData, setFormData] = useState({ name: '', phone: '', service: null, date: '', time: '' });
+      const [loading, setLoading] = useState(false);
+      const [success, setSuccess] = useState(false);
+      const [appointments, setAppointments] = useState([]);
 
-                    const btn = document.createElement('button');
-                    btn.className = 'date-btn flex-shrink-0 w-16 h-20 rounded-xl bg-dark-surfaceHighlight flex flex-col items-center justify-center border border-transparent transition focus:outline-none';
-                    btn.onclick = () => booking.selectDate(iso, btn);
-                    btn.innerHTML = `
-                        <span class="text-xs uppercase text-gray-500 font-bold mb-1">${dayName}</span>
-                        <span class="text-xl font-bold text-white">${dayNum}</span>
-                    `;
-                    dateScroller.appendChild(btn);
-                }
-            },
-            selectService: (id, el) => {
-                document.querySelectorAll('.service-card').forEach(c => {
-                    c.classList.remove('border-gold-400', 'bg-dark-surfaceHighlight');
-                    c.classList.add('border-transparent');
-                });
-                el.classList.remove('border-transparent');
-                el.classList.add('border-gold-400', 'bg-dark-surfaceHighlight');
-                
-                state.booking.service = SERVICES.find(s => s.id === id);
-                
-                // Unlock next step
-                const next = document.getElementById('datetime-section');
-                next.classList.remove('opacity-50', 'pointer-events-none');
-                
-                // Re-render times in case duration affects availability (simple version just renders slots)
-                if(state.booking.date) booking.renderTimes();
-            },
-            selectDate: (iso, el) => {
-                document.querySelectorAll('.date-btn').forEach(b => {
-                    b.classList.remove('bg-gold-400', 'text-black');
-                    b.classList.add('bg-dark-surfaceHighlight', 'text-white');
-                    b.querySelector('span:first-child').classList.remove('text-black');
-                    b.querySelector('span:first-child').classList.add('text-gray-500');
-                });
-                el.classList.remove('bg-dark-surfaceHighlight', 'text-white');
-                el.classList.add('bg-gold-400', 'text-black');
-                el.querySelector('span:first-child').classList.remove('text-gray-500');
-                el.querySelector('span:first-child').classList.add('text-black');
+      const services = [
+        { name: "Corte de Cabelo", price: 45, icon: "fa-scissors" },
+        { name: "Barba", price: 30, icon: "fa-face-smile" },
+        { name: "Cabelo e Barba", price: 70, icon: "fa-user-tie" },
+        { name: "Pigmentação", price: 60, icon: "fa-spray-can" }
+      ];
 
-                state.booking.date = iso;
-                booking.renderTimes();
-            },
-            renderTimes: () => {
-                const grid = document.getElementById('time-grid');
-                grid.innerHTML = '';
-                
-                const times = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
-                
-                // Check existing appointments for this date
-                const busySlots = state.appointments
-                    .filter(a => a.date === state.booking.date && a.status !== 'cancelled')
-                    .map(a => a.time);
+      const timeSlots = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
 
-                times.forEach(t => {
-                    const isBusy = busySlots.includes(t);
-                    const btn = document.createElement('button');
-                    btn.disabled = isBusy;
-                    btn.className = `py-2 rounded-lg text-sm font-medium border ${isBusy ? 'border-red-900/30 text-gray-600 bg-dark-surface cursor-not-allowed line-through' : 'border-gray-700 text-white hover:border-gold-400 hover:text-gold-400 time-slot-btn'}`;
-                    btn.textContent = t;
-                    if(!isBusy) {
-                        btn.onclick = () => {
-                            document.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('bg-gold-400', 'text-black', 'border-gold-400'));
-                            btn.classList.add('bg-gold-400', 'text-black', 'border-gold-400');
-                            btn.classList.remove('text-white', 'hover:text-gold-400');
-                            
-                            state.booking.time = t;
-                            document.getElementById('client-info-section').classList.remove('opacity-50', 'pointer-events-none');
-                            booking.validateForm();
-                        };
-                    }
-                    grid.appendChild(btn);
-                });
-            },
-            validateForm: () => {
-                const name = document.getElementById('booking-name').value;
-                const phone = document.getElementById('booking-phone').value;
-                const btn = document.getElementById('confirm-booking-btn');
-                
-                if(state.booking.service && state.booking.date && state.booking.time && name.length > 2 && phone.length > 8) {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                } else {
-                    btn.disabled = true;
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                }
-            },
-            submit: async () => {
-                if(!currentUser) return;
-                
-                const btn = document.getElementById('confirm-booking-btn');
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                
-                const name = document.getElementById('booking-name').value;
-                const phone = document.getElementById('booking-phone').value;
+      // Fetch existing appointments to block slots
+      useEffect(() => {
+        if (!db || !formData.date) return;
+        const { collection, query, where, onSnapshot } = window.firebaseModules;
+        const q = query(
+          collection(db, 'artifacts', appId, 'public', 'data', 'appointments'),
+          where('date', '==', formData.date)
+        );
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          setAppointments(snapshot.docs.map(d => d.data().time));
+        });
+        return () => unsubscribe();
+      }, [db, formData.date]);
 
-                // 1. Create/Update Client Logic
-                await crm.ensureClientExists(name, phone);
+      const handleSubmit = async () => {
+        setLoading(true);
+        const { collection, addDoc, query, where, getDocs } = window.firebaseModules;
+        
+        try {
+          // 1. Create Appointment
+          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), {
+            ...formData,
+            status: 'pendente',
+            createdAt: new Date().toISOString()
+          });
 
-                // 2. Create Appointment
-                const appointment = {
-                    clientName: name,
-                    clientPhone: phone,
-                    service: state.booking.service.name,
-                    price: state.booking.service.price,
-                    date: state.booking.date,
-                    time: state.booking.time,
-                    status: 'pending',
-                    createdAt: new Date().toISOString()
-                };
+          // 2. Check/Create Client Profile (Auto-CRM)
+          const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
+          const q = query(clientsRef, where("phone", "==", formData.phone));
+          const querySnapshot = await getDocs(q);
 
-                try {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), appointment);
-                    ui.toast('Agendamento confirmado!');
-                    
-                    // Reset and go home
-                    setTimeout(() => {
-                        window.location.reload(); // Simple reset
-                    }, 2000);
-                } catch (e) {
-                    console.error(e);
-                    ui.toast('Erro ao agendar. Tente novamente.');
-                    btn.innerHTML = 'Tentar Novamente';
-                }
-            }
-        };
-
-        // Inputs listeners for validation
-        document.getElementById('booking-name').addEventListener('input', booking.validateForm);
-        document.getElementById('booking-phone').addEventListener('input', booking.validateForm);
-
-        // --- ADMIN / CRM LOGIC ---
-        window.admin = {
-            login: () => {
-                const pass = document.getElementById('admin-pass').value;
-                if(pass === 'admin123') { // Simple gate
-                    state.adminMode = true;
-                    window.router.navigate('admin-dashboard');
-                    admin.loadDashboard();
-                } else {
-                    ui.toast('Senha incorreta');
-                }
-            },
-            logout: () => {
-                state.adminMode = false;
-                window.router.navigate('landing');
-            },
-            switchTab: (tabId) => {
-                document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
-                document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-                
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                // Find button by onclick content is messy, so relying on index or order
-                if(tabId === 'agenda') document.querySelector('.nav-item:nth-child(1)').classList.add('active');
-                if(tabId === 'clients') document.querySelector('.nav-item:nth-child(2)').classList.add('active');
-            },
-            loadDashboard: () => {
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('current-date-display').textContent = ui.formatDate(today);
-
-                // Metrics are updated via the Snapshot listener automatically
-                // Just rendering the list here based on state
-                admin.renderAgenda(state.appointments.filter(a => a.date === today));
-            },
-            renderAgenda: (list) => {
-                const container = document.getElementById('admin-agenda-list');
-                if(list.length === 0) {
-                    container.innerHTML = '<div class="text-center py-8 text-gray-600">Nenhum agendamento hoje.</div>';
-                    return;
-                }
-
-                // Sort by time
-                list.sort((a,b) => a.time.localeCompare(b.time));
-
-                container.innerHTML = list.map(app => `
-                    <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4 ${app.status === 'completed' ? 'border-green-500 opacity-70' : app.status === 'cancelled' ? 'border-red-500 opacity-50' : 'border-gold-400'}">
-                        <div>
-                            <p class="font-bold text-lg text-white">${app.time} <span class="text-sm font-normal text-gray-400 ml-2">${app.clientName}</span></p>
-                            <p class="text-xs text-gold-400">${app.service}</p>
-                        </div>
-                        
-                        ${app.status === 'pending' ? `
-                            <div class="flex gap-2">
-                                <button onclick="crm.completeAppointment('${app.docId}', '${app.clientName}', '${app.clientPhone}', '${app.service}')" class="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center hover:bg-green-500 hover:text-white transition"><i class="fas fa-check"></i></button>
-                                <button onclick="crm.updateStatus('${app.docId}', 'cancelled')" class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="fas fa-times"></i></button>
-                            </div>
-                        ` : `
-                            <span class="text-xs font-bold uppercase ${app.status === 'completed' ? 'text-green-500' : 'text-red-500'}">${app.status === 'completed' ? 'Finalizado' : 'Cancelado'}</span>
-                        `}
-                    </div>
-                `).join('');
-            }
-        };
-
-        window.crm = {
-            ensureClientExists: async (name, phone) => {
-                // Check if client exists
-                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), where('phone', '==', phone));
-                const snap = await getDocs(q);
-
-                if(snap.empty) {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), {
-                        name, 
-                        phone, 
-                        totalVisits: 0,
-                        totalSpent: 0,
-                        joinedAt: new Date().toISOString()
-                    });
-                }
-            },
-            filter: () => {
-                const term = document.getElementById('client-search').value.toLowerCase();
-                const filtered = state.clients.filter(c => c.name.toLowerCase().includes(term) || c.phone.includes(term));
-                crm.renderClients(filtered);
-            },
-            renderClients: (list) => {
-                const container = document.getElementById('crm-client-list');
-                container.innerHTML = list.map(c => `
-                    <div onclick="crm.openClientDetail('${c.docId}')" class="glass-panel p-4 rounded-xl cursor-pointer hover:border-gold-400 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gold-400 text-black font-bold flex items-center justify-center text-lg">
-                                ${c.name.charAt(0)}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-white leading-tight">${c.name}</h4>
-                                <p class="text-xs text-gray-500">${c.phone}</p>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-gray-700 flex justify-between text-xs text-gray-400">
-                            <span>Visitas: <b class="text-white">${c.totalVisits || 0}</b></span>
-                            <span>Última: ${ui.formatDate(c.lastVisit) || '-'}</span>
-                        </div>
-                    </div>
-                `).join('');
-            },
-            openClientDetail: async (clientId) => {
-                const client = state.clients.find(c => c.docId === clientId);
-                if(!client) return;
-
-                document.getElementById('detail-client-name').textContent = client.name;
-                document.getElementById('detail-client-phone').textContent = client.phone;
-                document.getElementById('detail-visits').textContent = client.totalVisits || 0;
-                document.getElementById('detail-ltv').textContent = ui.formatMoney(client.totalSpent || 0);
-                
-                // Fetch Logs/Passport
-                const logsQ = query(collection(db, 'artifacts', appId, 'public', 'data', 'client_logs'), where('clientId', '==', clientId));
-                const snap = await getDocs(logsQ);
-                const logs = snap.docs.map(d => d.data());
-                
-                // Sort logs by date desc
-                logs.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-                const timeline = document.getElementById('detail-timeline');
-                if(logs.length === 0) {
-                    timeline.innerHTML = '<p class="text-gray-500 text-sm ml-6">Nenhum registro encontrado.</p>';
-                } else {
-                    timeline.innerHTML = logs.map(log => `
-                        <div class="relative ml-8 mb-8 animate-fade-in">
-                            <div class="absolute -left-10 top-0 w-4 h-4 rounded-full border-2 border-gold-400 bg-dark-bg"></div>
-                            <span class="text-xs text-gold-400 font-bold mb-1 block">${ui.formatDate(log.date)}</span>
-                            
-                            <div class="glass-panel p-4 rounded-xl border-l-2 border-gold-400/50">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-bold text-white">${log.service}</h4>
-                                </div>
-                                ${log.photo ? `
-                                    <img src="${log.photo}" onclick="ui.lightbox(this.src)" class="w-full h-40 object-cover rounded-lg mb-3 border border-gray-700 cursor-zoom-in">
-                                ` : ''}
-                                <p class="text-sm text-gray-300 italic">"${log.notes}"</p>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                
-                // Store current client ID for the modal
-                document.getElementById('log-client-id').value = clientId;
-
-                window.router.navigate('client-detail');
-            },
-            updateStatus: async (docId, status) => {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', docId), { status });
-                ui.toast(`Agendamento ${status === 'completed' ? 'concluído' : 'cancelado'}`);
-            },
-            completeAppointment: async (docId, name, phone, service) => {
-                // 1. Mark as completed
-                await crm.updateStatus(docId, 'completed');
-                
-                // 2. Find Client by phone to prep modal
-                const client = state.clients.find(c => c.phone === phone);
-                if(client) {
-                    // Update client stats
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', client.docId), {
-                        lastVisit: new Date().toISOString().split('T')[0],
-                        totalVisits: (client.totalVisits || 0) + 1,
-                        // Adding price vaguely here for demo, ideally fetching service price
-                        totalSpent: (client.totalSpent || 0) + 50 
-                    });
-
-                    // 3. Prompt for Log
-                    document.getElementById('log-client-id').value = client.docId;
-                    document.getElementById('log-service').value = service; // Pre-select service
-                    ui.openModal('modal-log');
-                }
-            },
-            openLogModal: () => {
-                // Reset form
-                document.getElementById('form-log').reset();
-                document.getElementById('photo-preview-area').classList.add('hidden');
-                ui.openModal('modal-log');
-            },
-            handlePhotoPreview: (input) => {
-                if (input.files && input.files[0]) {
-                    // Check size < 500kb for Firestore demo safety
-                    if(input.files[0].size > 600000) {
-                        alert("A imagem deve ter menos de 500KB");
-                        input.value = "";
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        document.getElementById('photo-preview-img').src = e.target.result;
-                        document.getElementById('photo-preview-area').classList.remove('hidden');
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
-            },
-            saveLog: async (e) => {
-                e.preventDefault();
-                const btn = e.target.querySelector('button[type="submit"]');
-                const originalText = btn.innerText;
-                btn.innerText = "Salvando...";
-                btn.disabled = true;
-
-                const clientId = document.getElementById('log-client-id').value;
-                const service = document.getElementById('log-service').value;
-                const notes = document.getElementById('log-notes').value;
-                const photoSrc = document.getElementById('photo-preview-img').src;
-                // Only save photo if it's base64 (actually loaded), not empty src
-                const photo = photoSrc.includes('base64') ? photoSrc : null;
-
-                try {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'client_logs'), {
-                        clientId,
-                        date: new Date().toISOString().split('T')[0],
-                        service,
-                        notes,
-                        photo
-                    });
-                    
-                    ui.closeModal('modal-log');
-                    ui.toast("Registro salvo no passaporte!");
-                    
-                    // Refresh Detail View
-                    crm.openClientDetail(clientId);
-                } catch (error) {
-                    console.error(error);
-                    ui.toast("Erro ao salvar log.");
-                }
-                
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        };
-
-        // --- CLIENT PORTAL LOGIC ---
-        window.clientPortal = {
-            check: async () => {
-                const phone = document.getElementById('login-phone').value;
-                if(!phone) return;
-                
-                const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), where('clientPhone', '==', phone));
-                const snap = await getDocs(q);
-                
-                const list = document.getElementById('client-list-results');
-                if(snap.empty) {
-                    list.innerHTML = '<div class="text-center text-gray-500">Nenhum agendamento encontrado para este número.</div>';
-                    return;
-                }
-                
-                const apps = snap.docs.map(d => d.data());
-                apps.sort((a,b) => new Date(b.date) - new Date(a.date));
-                
-                list.innerHTML = apps.map(app => `
-                    <div class="glass-panel p-4 rounded-lg flex justify-between items-center border-l-2 ${app.status === 'completed' ? 'border-green-500' : app.status === 'pending' ? 'border-gold-400' : 'border-red-500'}">
-                        <div>
-                            <p class="font-bold text-white">${app.service}</p>
-                            <p class="text-xs text-gray-400">${ui.formatDate(app.date)} às ${app.time}</p>
-                        </div>
-                        <span class="text-xs uppercase font-bold text-gray-300">${app.status === 'pending' ? 'Confirmado' : app.status}</span>
-                    </div>
-                `).join('');
-            }
-        };
-
-        // --- DATA LISTENERS ---
-        function initListeners() {
-            if(!currentUser) return;
-            document.getElementById('global-loader').classList.add('hidden');
-
-            // Listen for Appointments (Global for Admin Dashboard)
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snap) => {
-                state.appointments = snap.docs.map(d => ({docId: d.id, ...d.data()}));
-                
-                if(state.adminMode) {
-                    admin.loadDashboard();
-                    
-                    // Calc Metrics
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    const todayApps = state.appointments.filter(a => a.date === todayStr && a.status !== 'cancelled');
-                    document.getElementById('metric-today-count').textContent = todayApps.length;
-                    
-                    const revenue = todayApps.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
-                    document.getElementById('metric-revenue').textContent = ui.formatMoney(revenue);
-                }
+          if (querySnapshot.empty) {
+            await addDoc(clientsRef, {
+              name: formData.name,
+              phone: formData.phone,
+              totalVisits: 0,
+              joinedAt: new Date().toISOString()
             });
+          }
 
-            // Listen for Clients (For CRM)
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), (snap) => {
-                state.clients = snap.docs.map(d => ({docId: d.id, ...d.data()}));
-                if(state.adminMode) crm.filter(); // Refresh list
+          setSuccess(true);
+        } catch (error) {
+          console.error("Error booking:", error);
+          alert("Erro ao agendar. Tente novamente.");
+        }
+        setLoading(false);
+      };
+
+      if (success) return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="glass-panel max-w-md w-full p-8 rounded-2xl text-center fade-in">
+            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i className="fa-solid fa-check text-3xl text-green-500"></i>
+            </div>
+            <h2 className="heading-font text-2xl text-white mb-2">Agendamento Confirmado!</h2>
+            <p className="text-gray-400 mb-6">Te aguardamos, {formData.name}.</p>
+            <button onClick={() => { setSuccess(false); setStep(1); setFormData({ name: '', phone: '', service: null, date: '', time: '' }) }} className="btn-primary w-full py-3 rounded-lg font-bold">
+              Novo Agendamento
+            </button>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen p-4 flex flex-col items-center justify-center relative">
+          <button onClick={onAdminLogin} className="absolute top-4 right-4 text-xs text-gray-600 hover:text-gold uppercase tracking-widest">
+            Área do Profissional
+          </button>
+
+          <div className="glass-panel max-w-lg w-full rounded-2xl p-6 md:p-10 shadow-2xl border-t border-white/10">
+            <div className="text-center mb-8">
+              <h1 className="heading-font text-3xl font-bold text-gold mb-1">BARBER<span className="text-white">PRO</span></h1>
+              <p className="text-sm text-gray-500">Agende seu horário com estilo</p>
+            </div>
+
+            {/* Step Indicators */}
+            <div className="flex justify-between mb-8 relative">
+              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-[#333] -z-10"></div>
+              {[1, 2, 3].map(s => (
+                <div key={s} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold-primary text-black scale-110' : 'bg-[#333] text-gray-500'}`} style={{backgroundColor: step >= s ? '#D4AF37' : '#333'}}>
+                  {s}
+                </div>
+              ))}
+            </div>
+
+            {/* Step 1: Info */}
+            {step === 1 && (
+              <div className="space-y-4 fade-in">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Nome Completo</label>
+                  <input 
+                    type="text" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold-primary focus:outline-none"
+                    placeholder="Seu nome"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Telefone (WhatsApp)</label>
+                  <input 
+                    type="tel" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold-primary focus:outline-none"
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+                <button 
+                  disabled={!formData.name || !formData.phone}
+                  onClick={() => setStep(2)}
+                  className="w-full btn-primary py-3 rounded-lg font-bold mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Próximo <i className="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Step 2: Service */}
+            {step === 2 && (
+              <div className="fade-in">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  {services.map((s) => (
+                    <div 
+                      key={s.name}
+                      onClick={() => setFormData({...formData, service: s.name})}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${formData.service === s.name ? 'border-gold bg-yellow-500/10' : 'border-[#333] bg-[#1a1a1a] hover:border-gray-500'}`}
+                    >
+                      <i className={`fa-solid ${s.icon} text-2xl mb-2 ${formData.service === s.name ? 'text-gold' : 'text-gray-400'}`}></i>
+                      <h3 className="font-bold text-sm">{s.name}</h3>
+                      <p className="text-xs text-gray-400">R$ {s.price},00</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(1)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400 hover:text-white">Voltar</button>
+                  <button 
+                    disabled={!formData.service}
+                    onClick={() => setStep(3)}
+                    className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50"
+                  >
+                    Próximo
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Date & Time */}
+            {step === 3 && (
+              <div className="fade-in">
+                <div className="mb-4">
+                  <label className="block text-xs text-gray-500 mb-1 uppercase tracking-wider">Data</label>
+                  <input 
+                    type="date" 
+                    value={formData.date}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setFormData({...formData, date: e.target.value, time: ''})}
+                    className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold-primary focus:outline-none"
+                  />
+                </div>
+                
+                {formData.date && (
+                  <div className="mb-6">
+                    <label className="block text-xs text-gray-500 mb-2 uppercase tracking-wider">Horários Disponíveis</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {timeSlots.map(time => {
+                        const isTaken = appointments.includes(time);
+                        return (
+                          <button
+                            key={time}
+                            disabled={isTaken}
+                            onClick={() => setFormData({...formData, time})}
+                            className={`py-2 rounded text-sm ${
+                              isTaken 
+                                ? 'bg-[#222] text-[#444] cursor-not-allowed line-through' 
+                                : formData.time === time
+                                  ? 'bg-gold-primary text-black font-bold'
+                                  : 'bg-[#1a1a1a] border border-[#333] hover:border-gold'
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button onClick={() => setStep(2)} className="w-1/3 py-3 border border-[#333] rounded-lg text-gray-400 hover:text-white">Voltar</button>
+                  <button 
+                    disabled={!formData.date || !formData.time || loading}
+                    onClick={handleSubmit}
+                    className="w-2/3 btn-primary py-3 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Confirmar'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // 4. Admin Portal Components
+
+    const Dashboard = ({ db, appId }) => {
+      const [stats, setStats] = useState({ total: 0, pending: 0, revenue: 0, today: 0 });
+
+      useEffect(() => {
+        const { collection, onSnapshot } = window.firebaseModules;
+        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'appointments'), (snapshot) => {
+          let t = 0, p = 0, r = 0, td = 0;
+          const todayStr = new Date().toISOString().split('T')[0];
+          
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            t++;
+            if (data.status === 'pendente') p++;
+            if (data.status === 'realizado') {
+              // Approximate price map since we didn't store price in appointment directly in this simplified schema
+              // In production, store price at booking time.
+              const prices = { "Corte de Cabelo": 45, "Barba": 30, "Cabelo e Barba": 70, "Pigmentação": 60 };
+              r += (prices[data.service] || 0);
+            }
+            if (data.date === todayStr) td++;
+          });
+          setStats({ total: t, pending: p, revenue: r, today: td });
+        });
+        return () => unsubscribe();
+      }, [db, appId]);
+
+      return (
+        <div className="p-6 md:p-10 fade-in">
+          <h2 className="heading-font text-3xl mb-8">Painel de Controle</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-blue-500">
+              <p className="text-gray-400 text-sm uppercase">Agendamentos Hoje</p>
+              <h3 className="text-3xl font-bold mt-2">{stats.today}</h3>
+            </div>
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-yellow-500">
+              <p className="text-gray-400 text-sm uppercase">Pendentes</p>
+              <h3 className="text-3xl font-bold mt-2 text-yellow-500">{stats.pending}</h3>
+            </div>
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-green-500">
+              <p className="text-gray-400 text-sm uppercase">Faturamento (Est.)</p>
+              <h3 className="text-3xl font-bold mt-2 text-green-500">R$ {stats.revenue}</h3>
+            </div>
+            <div className="glass-panel p-6 rounded-xl border-l-4 border-purple-500">
+              <p className="text-gray-400 text-sm uppercase">Total Geral</p>
+              <h3 className="text-3xl font-bold mt-2">{stats.total}</h3>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Schedule = ({ db, appId, onSelectClient }) => {
+      const [appointments, setAppointments] = useState([]);
+      const [filter, setFilter] = useState('today'); // today, all, pending
+      const [finishingAppt, setFinishingAppt] = useState(null); // The appointment being finished
+
+      useEffect(() => {
+        const { collection, onSnapshot, query, where, orderBy } = window.firebaseModules;
+        let q = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
+        
+        // Sorting in memory for simplicity with index limitations, or create simple index
+        // Defaulting to simple fetch and JS sort to avoid index errors in this environment
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          let data = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+          
+          // JS Sort
+          data.sort((a,b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+
+          // Filter Logic
+          const today = new Date().toISOString().split('T')[0];
+          if (filter === 'today') {
+            data = data.filter(d => d.date === today);
+          } else if (filter === 'pending') {
+            data = data.filter(d => d.status === 'pendente');
+          }
+          
+          setAppointments(data);
+        });
+        return () => unsubscribe();
+      }, [db, appId, filter]);
+
+      const updateStatus = async (id, status) => {
+        const { doc, updateDoc } = window.firebaseModules;
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'appointments', id), { status });
+      };
+
+      const handleFinish = (appt) => {
+        setFinishingAppt(appt);
+      };
+
+      const closeFinishModal = () => {
+        setFinishingAppt(null);
+      };
+
+      return (
+        <div className="p-6 md:p-10 fade-in h-full flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="heading-font text-3xl">Agenda</h2>
+            <div className="flex bg-[#1E1E1E] rounded-lg p-1 border border-[#333]">
+              {['today', 'pending', 'all'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-4 py-1.5 rounded text-xs uppercase font-bold transition ${filter === f ? 'bg-[#333] text-white' : 'text-gray-500'}`}
+                >
+                  {f === 'today' ? 'Hoje' : f === 'pending' ? 'Pendentes' : 'Todos'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-auto space-y-3 pb-20">
+            {appointments.length === 0 ? (
+              <div className="text-center text-gray-500 mt-20">Nenhum agendamento encontrado para este filtro.</div>
+            ) : (
+              appointments.map(app => (
+                <div key={app.id} className="glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center justify-between border-l-4 border-[#333] hover:border-gold transition-colors">
+                  <div className="flex items-center gap-4 w-full md:w-auto mb-4 md:mb-0">
+                    <div className="w-14 h-14 bg-[#111] rounded-full flex items-center justify-center text-xl font-bold text-gray-300">
+                      {app.time.split(':')[0]}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">{app.name}</h4>
+                      <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <span><i className="fa-solid fa-scissors text-gold text-xs mr-1"></i> {app.service}</span>
+                        <span><i className="fa-solid fa-calendar text-gold text-xs mr-1"></i> {app.date.split('-').reverse().join('/')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 w-full md:w-auto">
+                    {app.status === 'pendente' && (
+                      <>
+                        <button onClick={() => updateStatus(app.id, 'confirmado')} className="flex-1 md:flex-none px-4 py-2 bg-green-500/20 text-green-500 rounded hover:bg-green-500/30">
+                          <i className="fa-solid fa-check mr-1"></i> Confirmar
+                        </button>
+                        <button onClick={() => updateStatus(app.id, 'cancelado')} className="flex-1 md:flex-none px-4 py-2 bg-red-500/20 text-red-500 rounded hover:bg-red-500/30">
+                          <i className="fa-solid fa-xmark mr-1"></i>
+                        </button>
+                      </>
+                    )}
+                    {app.status === 'confirmado' && (
+                      <button onClick={() => handleFinish(app)} className="flex-1 md:flex-none px-6 py-2 btn-primary rounded font-bold shadow-lg">
+                        Finalizar Atendimento
+                      </button>
+                    )}
+                    {app.status === 'realizado' && (
+                      <span className="px-4 py-2 text-green-500 font-bold border border-green-500/30 rounded flex items-center">
+                        <i className="fa-solid fa-check-double mr-2"></i> Realizado
+                      </span>
+                    )}
+                    {app.status === 'cancelado' && (
+                      <span className="px-4 py-2 text-red-500/50 italic">Cancelado</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Finish Modal (Integration Point) */}
+          {finishingAppt && (
+            <FinishServiceModal 
+              appt={finishingAppt} 
+              onClose={closeFinishModal} 
+              db={db} 
+              appId={appId} 
+              onStatusUpdate={updateStatus}
+            />
+          )}
+        </div>
+      );
+    };
+
+    // 5. CRM Components
+    
+    const ClientList = ({ db, appId, onViewProfile }) => {
+      const [clients, setClients] = useState([]);
+      const [search, setSearch] = useState('');
+
+      useEffect(() => {
+        const { collection, onSnapshot } = window.firebaseModules;
+        const unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'clients'), (snapshot) => {
+          const list = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+          setClients(list);
+        });
+        return () => unsubscribe();
+      }, [db, appId]);
+
+      const filteredClients = clients.filter(c => 
+        c.name.toLowerCase().includes(search.toLowerCase()) || 
+        c.phone.includes(search)
+      );
+
+      return (
+        <div className="p-6 md:p-10 h-full flex flex-col fade-in">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="heading-font text-3xl">Clientes</h2>
+            <button className="hidden md:block btn-primary px-4 py-2 rounded text-sm font-bold">
+              <i className="fa-solid fa-plus mr-2"></i> Novo
+            </button>
+          </div>
+          
+          <div className="mb-6 relative">
+            <i className="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            <input 
+              type="text" 
+              placeholder="Buscar por nome ou telefone..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-[#1E1E1E] border border-[#333] rounded-xl py-3 pl-12 text-white focus:border-gold focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto pb-20">
+            {filteredClients.map(client => (
+              <div 
+                key={client.id} 
+                onClick={() => onViewProfile(client)}
+                className="glass-panel p-5 rounded-xl cursor-pointer hover:border-gold transition-colors group"
+              >
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center font-bold text-xl group-hover:text-gold">
+                    {client.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg">{client.name}</h4>
+                    <p className="text-gray-400 text-sm">{client.phone}</p>
+                  </div>
+                </div>
+                <div className="border-t border-[#333] pt-3 flex justify-between text-xs text-gray-500">
+                  <span>Visitas: <span className="text-white">{client.totalVisits || 0}</span></span>
+                  <span className="text-gold group-hover:underline">Ver Prontuário →</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const ClientProfile = ({ db, appId, client, onBack }) => {
+      const [history, setHistory] = useState([]);
+      const [showLightbox, setShowLightbox] = useState(null);
+
+      useEffect(() => {
+        // Fetch Service History (stored in a subcollection or separate collection linked by phone/clientId)
+        // Here assuming a separate collection 'service_records' linked by clientPhone for simplicity in this structure
+        const { collection, query, where, onSnapshot } = window.firebaseModules;
+        const q = query(
+          collection(db, 'artifacts', appId, 'public', 'data', 'service_records'),
+          where('clientPhone', '==', client.phone)
+        );
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          // Sort client side
+          const recs = snapshot.docs.map(d => d.data());
+          recs.sort((a,b) => new Date(b.date) - new Date(a.date));
+          setHistory(recs);
+        });
+        return () => unsubscribe();
+      }, [client]);
+
+      return (
+        <div className="h-full flex flex-col bg-[#121212] absolute top-0 left-0 w-full z-10 fade-in">
+          {/* Header */}
+          <div className="p-6 border-b border-[#333] flex items-center gap-4 bg-[#1E1E1E]">
+            <button onClick={onBack} className="w-10 h-10 rounded-full hover:bg-[#333] flex items-center justify-center">
+              <i className="fa-solid fa-arrow-left"></i>
+            </button>
+            <div className="flex-1">
+              <h2 className="heading-font text-2xl font-bold">{client.name}</h2>
+              <p className="text-gray-400 text-sm">{client.phone}</p>
+            </div>
+            <div className="text-right hidden md:block">
+              <p className="text-xs text-gray-500 uppercase">Total de Visitas</p>
+              <p className="text-xl font-bold text-gold">{client.totalVisits || 0}</p>
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="flex-1 overflow-auto p-6 md:p-10">
+            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+              <i className="fa-solid fa-clock-rotate-left text-gold"></i> Histórico de Estilo
+            </h3>
+
+            {history.length === 0 ? (
+              <div className="text-center text-gray-500 py-10 border border-dashed border-[#333] rounded-xl">
+                Nenhum registro histórico encontrado.
+              </div>
+            ) : (
+              <div className="space-y-8 relative before:absolute before:left-4 before:top-0 before:h-full before:w-0.5 before:bg-[#333]">
+                {history.map((record, idx) => (
+                  <div key={idx} className="relative pl-12">
+                    <div className="absolute left-[9px] top-0 w-4 h-4 rounded-full bg-gold-primary border-4 border-[#121212]"></div>
+                    
+                    <div className="glass-panel p-5 rounded-xl border border-[#333]">
+                      <div className="flex justify-between items-start mb-4 border-b border-[#333] pb-3">
+                        <div>
+                          <p className="text-gold font-bold">{record.service}</p>
+                          <p className="text-xs text-gray-400">{new Date(record.date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                        {record.barber && <span className="text-xs bg-[#333] px-2 py-1 rounded">{record.barber}</span>}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase mb-1">Notas do Corte</p>
+                          <p className="text-sm text-gray-300">{record.notes || '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase mb-1">Produtos</p>
+                          <p className="text-sm text-gray-300">{record.products || '-'}</p>
+                        </div>
+                      </div>
+
+                      {record.photos && record.photos.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-[#333]">
+                          <p className="text-xs text-gray-500 uppercase mb-2">Registro Fotográfico</p>
+                          <div className="flex gap-2 overflow-x-auto pb-2">
+                            {record.photos.map((photo, pIdx) => (
+                              <img 
+                                key={pIdx} 
+                                src={photo} 
+                                onClick={() => setShowLightbox(photo)}
+                                className="w-20 h-20 object-cover rounded-lg border border-[#333] cursor-pointer hover:border-gold" 
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Lightbox */}
+          {showLightbox && (
+            <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowLightbox(null)}>
+              <img src={showLightbox} className="max-w-full max-h-full rounded shadow-2xl" />
+              <button className="absolute top-4 right-4 text-white text-3xl">&times;</button>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // 6. Finish Service Modal (The Connector)
+    const FinishServiceModal = ({ appt, onClose, db, appId, onStatusUpdate }) => {
+      const [notes, setNotes] = useState('');
+      const [products, setProducts] = useState('');
+      const [photos, setPhotos] = useState([]); // Array of base64 strings
+      const [saving, setSaving] = useState(false);
+
+      const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setPhotos(prev => [...prev, reader.result]);
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+
+      const handleSave = async () => {
+        setSaving(true);
+        const { collection, addDoc, query, where, getDocs, updateDoc, doc, increment } = window.firebaseModules;
+        
+        try {
+          // 1. Add Service Record
+          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'service_records'), {
+            clientPhone: appt.phone,
+            clientName: appt.name,
+            service: appt.service,
+            date: appt.date,
+            notes,
+            products,
+            photos, // Storing base64 directly (Note: Firestore has 1MB doc limit, fine for demo/small thumbnails)
+            createdAt: new Date().toISOString()
+          });
+
+          // 2. Update Appointment Status
+          await onStatusUpdate(appt.id, 'realizado');
+
+          // 3. Increment Client Visits
+          const clientsRef = collection(db, 'artifacts', appId, 'public', 'data', 'clients');
+          const q = query(clientsRef, where("phone", "==", appt.phone));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const clientDoc = snap.docs[0];
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'clients', clientDoc.id), {
+              totalVisits: (clientDoc.data().totalVisits || 0) + 1,
+              lastVisit: appt.date
             });
+          }
+
+          onClose();
+        } catch (error) {
+          console.error(error);
+          alert("Erro ao salvar registro.");
+        }
+        setSaving(false);
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1E1E1E] w-full max-w-lg rounded-2xl border border-[#333] shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="p-5 border-b border-[#333] flex justify-between items-center">
+              <h3 className="heading-font text-xl">Finalizar Atendimento</h3>
+              <button onClick={onClose} className="text-gray-500 hover:text-white"><i className="fa-solid fa-times text-xl"></i></button>
+            </div>
             
-            // Start Booking Logic
-            booking.init();
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div className="bg-green-900/20 border border-green-900/50 p-3 rounded text-green-400 text-sm mb-4">
+                <i className="fa-solid fa-info-circle mr-2"></i>
+                Ao finalizar, o status será atualizado e os dados salvos no histórico do cliente.
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-500 uppercase mb-1">Notas do Serviço (Corte/Técnica)</label>
+                <textarea 
+                  className="w-full bg-[#121212] border border-[#333] rounded p-3 text-white focus:border-gold focus:outline-none"
+                  rows="3"
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="Ex: Disfarçado na 1, topo na tesoura..."
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-500 uppercase mb-1">Produtos Utilizados</label>
+                <input 
+                  type="text" 
+                  className="w-full bg-[#121212] border border-[#333] rounded p-3 text-white focus:border-gold focus:outline-none"
+                  value={products}
+                  onChange={e => setProducts(e.target.value)}
+                  placeholder="Ex: Pomada Matte, Óleo de Barba..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-500 uppercase mb-2">Fotos do Resultado</label>
+                <div className="flex flex-wrap gap-2">
+                  <label className="w-20 h-20 border-2 border-dashed border-[#333] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gold hover:text-gold text-gray-500 transition-colors">
+                    <i className="fa-solid fa-camera mb-1"></i>
+                    <span className="text-[10px]">Add</span>
+                    <input type="file" className="hidden" accept="image/*" multiple onChange={handleFileChange} />
+                  </label>
+                  {photos.map((p, idx) => (
+                    <div key={idx} className="relative w-20 h-20 group">
+                      <img src={p} className="w-full h-full object-cover rounded-lg border border-[#333]" />
+                      <button 
+                        onClick={() => setPhotos(prev => prev.filter((_, i) => i !== idx))}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
+                      >&times;</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-[#333] flex justify-end gap-3">
+              <button onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white">Cancelar</button>
+              <button 
+                onClick={handleSave} 
+                disabled={saving}
+                className="btn-primary px-6 py-2 rounded font-bold flex items-center gap-2"
+              >
+                {saving ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <><i className="fa-solid fa-check"></i> Concluir</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // --- Main Admin Layout ---
+
+    const AdminLayout = ({ db, appId, onLogout }) => {
+      const [activeTab, setActiveTab] = useState('dashboard');
+      const [selectedClient, setSelectedClient] = useState(null);
+
+      const renderContent = () => {
+        if (selectedClient) {
+          return <ClientProfile db={db} appId={appId} client={selectedClient} onBack={() => setSelectedClient(null)} />;
         }
 
-    </script>
+        switch (activeTab) {
+          case 'dashboard': return <Dashboard db={db} appId={appId} />;
+          case 'schedule': return <Schedule db={db} appId={appId} />;
+          case 'clients': return <ClientList db={db} appId={appId} onViewProfile={setSelectedClient} />;
+          case 'services': return <div className="p-10 text-gray-500">Configurações de Serviços (Em Breve)</div>;
+          default: return <Dashboard db={db} appId={appId} />;
+        }
+      };
+
+      return (
+        <div className="flex min-h-screen bg-[#121212]">
+          <Navigation activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} />
+          <div className="flex-1 ml-0 md:ml-64 relative">
+            {/* Top Bar Mobile */}
+            <div className="md:hidden p-4 border-b border-[#333] flex justify-between items-center bg-[#1E1E1E]">
+              <h1 className="heading-font text-xl text-gold font-bold">BARBERPRO</h1>
+              <div className="w-8 h-8 rounded-full bg-gray-700"></div>
+            </div>
+            
+            {/* Content Area */}
+            <main className="h-[calc(100vh-60px)] md:h-screen overflow-auto relative">
+              {renderContent()}
+            </main>
+          </div>
+        </div>
+      );
+    };
+
+    // --- App Root ---
+
+    const App = () => {
+      const { db, auth, user, appId } = useFirebase();
+      const [view, setView] = useState('client'); // 'client', 'login', 'admin'
+      const [password, setPassword] = useState('');
+
+      if (!db || !user) return <Loading />;
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        // Simple hardcoded auth for demo purposes as requested
+        if (password === 'admin123') {
+          setView('admin');
+        } else {
+          alert('Senha incorreta');
+        }
+      };
+
+      // Admin Login Screen
+      if (view === 'login') {
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="glass-panel p-8 rounded-2xl w-full max-w-sm border-t border-gold/50 shadow-2xl fade-in">
+              <div className="text-center mb-8">
+                <h2 className="heading-font text-2xl text-white">Área Restrita</h2>
+                <p className="text-sm text-gray-500">Acesso Profissional</p>
+              </div>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Senha de Acesso"
+                  className="w-full bg-[#121212] border border-[#333] rounded-lg p-3 text-white focus:border-gold focus:outline-none"
+                />
+                <button type="submit" className="w-full btn-primary py-3 rounded-lg font-bold">Entrar</button>
+              </form>
+              <button onClick={() => setView('client')} className="w-full mt-4 text-xs text-gray-500 hover:text-white">
+                Voltar ao Agendamento
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Admin Panel
+      if (view === 'admin') {
+        return <AdminLayout db={db} appId={appId} onLogout={() => { setView('client'); setPassword(''); }} />;
+      }
+
+      // Default: Client Booking
+      return <ClientBooking db={db} appId={appId} onAdminLogin={() => setView('login')} />;
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
 </body>
 </html>
 
